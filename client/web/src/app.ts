@@ -33,7 +33,7 @@ async function setupApp() {
       connection.joinGame({});
     }
     if (buffer === undefined) {
-      buffer = new InterpolationBuffer<PlayerState>(state, 100, lerp);
+      buffer = new InterpolationBuffer<PlayerState>(state, 50, lerp);
     } else {
       buffer.enqueue(state, updatedAt);
     }
