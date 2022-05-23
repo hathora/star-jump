@@ -1,33 +1,80 @@
-import { Application, Rectangle, Sprite, Texture } from "pixi.js";
+import Phaser from "phaser";
 import { InterpolationBuffer } from "interpolation-buffer";
 import { HathoraClient, UpdateArgs } from "../../.hathora/client";
 import { Player, PlayerState, UserId } from "../../../api/types";
 import skyUrl from "./assets/sky.png";
-import dudeUrl from "./assets/dude.png";
-
-const MAP_WIDTH = 800;
-const MAP_HEIGHT = 600;
+import playerUrl from "./assets/dude.png";
 
 const client = new HathoraClient();
-const entities: Map<UserId, Sprite> = new Map();
+let buffer: InterpolationBuffer<PlayerState> | undefined;
+const entities: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
 
-const backgroundTexture = Texture.from(skyUrl);
-const dudeTexture = Texture.from(dudeUrl);
+class GameScene extends Phaser.Scene {
+  preload() {
+    this.load.image("sky", skyUrl);
+    this.load.spritesheet("player", playerUrl, { frameWidth: 32, frameHeight: 48 });
+  }
 
-setupApp().then((view) => {
-  document.body.appendChild(view);
-});
+  create() {
+    this.add.image(400, 300, "sky");
+
+    this.anims.create({
+      key: "left",
+      frames: this.anims.generateFrameNumbers("player", { start: 0, end: 3 }),
+      frameRate: 10,
+    });
+    this.anims.create({
+      key: "turn",
+      frames: [{ key: "player", frame: 4 }],
+    });
+    this.anims.create({
+      key: "right",
+      frames: this.anims.generateFrameNumbers("player", { start: 5, end: 8 }),
+      frameRate: 10,
+    });
+  }
+
+  update() {
+    if (buffer === undefined) {
+      return;
+    }
+    const state = buffer.getInterpolatedState(Date.now());
+    state.entities.forEach(({ id, x, y }) => {
+      if (!entities.has(id)) {
+        const sprite = new Phaser.GameObjects.Sprite(this, x, y, "player");
+        this.add.existing(sprite);
+        entities.set(id, sprite);
+      } else {
+        const sprite = entities.get(id)!;
+        if (x < sprite.x) {
+          sprite.anims.play("left", true);
+        } else if (x > sprite.x) {
+          sprite.anims.play("right", true);
+        } else {
+          sprite.anims.play("turn", true);
+        }
+        sprite.x = x;
+        sprite.y = y;
+      }
+    });
+  }
+}
+
+const config: Phaser.Types.Core.GameConfig = {
+  type: Phaser.AUTO,
+  width: 800,
+  height: 600,
+  scene: GameScene,
+};
+
+setupApp().then(() => new Phaser.Game(config));
 
 async function setupApp() {
-  const app = new Application({ width: MAP_WIDTH, height: MAP_HEIGHT });
-  app.stage.addChild(Sprite.from(backgroundTexture));
-
   if (sessionStorage.getItem("token") === null) {
     sessionStorage.setItem("token", await client.loginAnonymous());
   }
   const token = sessionStorage.getItem("token")!;
   const user = HathoraClient.getUserFromToken(token);
-  let buffer: InterpolationBuffer<PlayerState> | undefined;
   const connection = await getClient(token, ({ state, updatedAt }) => {
     if (state.entities.find((entity) => entity.id === user.id) === undefined) {
       connection.joinGame({});
@@ -61,28 +108,6 @@ async function setupApp() {
   }
   document.addEventListener("keydown", handleKeyEvt);
   document.addEventListener("keyup", handleKeyEvt);
-
-  app.ticker.add(() => {
-    if (buffer === undefined) {
-      return;
-    }
-    const state = buffer.getInterpolatedState(Date.now());
-    state.entities.forEach(({ id, x, y }) => {
-      if (!entities.has(id)) {
-        const sprite = Sprite.from(new Texture(dudeTexture.baseTexture, new Rectangle(128, 0, 32, 48)));
-        sprite.x = x;
-        sprite.y = y;
-        app.stage.addChild(sprite);
-        entities.set(id, sprite);
-      } else {
-        const sprite = entities.get(id)!;
-        sprite.x = x;
-        sprite.y = y;
-      }
-    });
-  });
-
-  return app.view;
 }
 
 async function getClient(token: string, onStateChange: (args: UpdateArgs) => void) {

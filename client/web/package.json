@@ -4,7 +4,7 @@
   "type": "module",
   "dependencies": {
     "interpolation-buffer": "^1.2.3",
-    "pixi.js": "^6.0.4"
+    "phaser": "^3.55.2"
   },
   "devDependencies": {
     "typescript": "^4.3.4"
