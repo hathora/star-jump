@@ -11,7 +11,6 @@ const MAP_HEIGHT = 600;
 const client = new HathoraClient();
 const entities: Map<UserId, Sprite> = new Map();
 
-console.log(skyUrl, dudeUrl);
 const backgroundTexture = Texture.from(skyUrl);
 const dudeTexture = Texture.from(dudeUrl);
 
