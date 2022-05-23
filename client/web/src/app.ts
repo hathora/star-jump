@@ -16,6 +16,9 @@ class GameScene extends Phaser.Scene {
   create() {
     this.add.image(400, 300, "sky");
 
+    const platform = this.add.rectangle(200, 500, 400, 32, 0x00ff00);
+    platform.setOrigin(0, 0);
+
     this.anims.create({
       key: "left",
       frames: this.anims.generateFrameNumbers("player", { start: 0, end: 3 }),
