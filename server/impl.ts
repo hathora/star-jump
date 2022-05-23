@@ -20,8 +20,10 @@ export class Impl implements Methods<InternalState> {
   }
   joinGame(state: InternalState, userId: string): Response {
     const body = state.physics.add.body(20, 20, 32, 48);
+    body.pushable = false;
     // @ts-ignore
     body.setCollideWorldBounds(true);
+    state.entities.forEach((entity) => state.physics.add.collider(body, entity.body));
     state.entities.push({ id: userId, body, inputs: { left: false, right: false, up: false } });
     return Response.ok();
   }
