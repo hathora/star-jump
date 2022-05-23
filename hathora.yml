@@ -1,0 +1,23 @@
+types:
+  Inputs:
+    left: boolean
+    right: boolean
+    up: boolean
+  Player:
+    id: UserId
+    x: float
+    y: float
+  PlayerState:
+    entities: Player[]
+
+methods:
+  joinGame:
+  setInputs:
+    inputs: Inputs
+
+auth:
+  anonymous: {}
+
+userState: PlayerState
+error: string
+tick: 50
