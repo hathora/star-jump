@@ -19,6 +19,9 @@ export class Impl implements Methods<InternalState> {
     return { physics: new ArcadePhysics(config), entities: [] };
   }
   joinGame(state: InternalState, userId: string): Response {
+    if (state.entities.find((entity) => entity.id === userId) !== undefined) {
+      return Response.error("Already joined");
+    }
     const body = state.physics.add.body(20, 20, 32, 48);
     body.pushable = false;
     // @ts-ignore
