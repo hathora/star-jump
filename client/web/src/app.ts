@@ -40,6 +40,7 @@ class GameScene extends Phaser.Scene {
     state.entities.forEach(({ id, x, y }) => {
       if (!entities.has(id)) {
         const sprite = new Phaser.GameObjects.Sprite(this, x, y, "player");
+        sprite.setOrigin(0, 0);
         this.add.existing(sprite);
         entities.set(id, sprite);
       } else {
