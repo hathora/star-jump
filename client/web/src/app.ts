@@ -2,8 +2,6 @@ import Phaser from "phaser";
 import { InterpolationBuffer } from "interpolation-buffer";
 import { HathoraClient, UpdateArgs } from "../../.hathora/client";
 import { Player, PlayerState, UserId } from "../../../api/types";
-import skyUrl from "./assets/sky.png";
-import playerUrl from "./assets/dude.png";
 
 const client = new HathoraClient();
 let buffer: InterpolationBuffer<PlayerState> | undefined;
@@ -11,8 +9,8 @@ const entities: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
 
 class GameScene extends Phaser.Scene {
   preload() {
-    this.load.image("sky", skyUrl);
-    this.load.spritesheet("player", playerUrl, { frameWidth: 32, frameHeight: 48 });
+    this.load.image("sky", "/sky.png");
+    this.load.spritesheet("player", "/dude.png", { frameWidth: 32, frameHeight: 48 });
   }
 
   create() {
