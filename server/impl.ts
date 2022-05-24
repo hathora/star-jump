@@ -26,7 +26,7 @@ export class Impl implements Methods<InternalState> {
     const platforms = generatePlatforms(MAP_WIDTH, MAP_HEIGHT, ctx.chance);
     return {
       physics,
-      platforms: platforms.map(({ x, y, width }) => makeStaticBody(physics, x, y, width)),
+      platforms: platforms.map(({ x, y, width }) => makePlatform(physics, x, y, width)),
       players: [],
     };
   }
@@ -44,7 +44,7 @@ export class Impl implements Methods<InternalState> {
     return Response.ok();
   }
   setInputs(state: InternalState, userId: UserId, ctx: Context, request: ISetInputsRequest): Response {
-    const player = state.players.find((player) => player.id === userId);
+    const player = state.players.find((p) => p.id === userId);
     if (player === undefined) {
       return Response.error("Player not joined");
     }
@@ -52,31 +52,21 @@ export class Impl implements Methods<InternalState> {
     return Response.ok();
   }
   freeze(state: InternalState, userId: string, ctx: Context, request: IFreezeRequest): Response {
-    const player = state.players.find((player) => player.id === userId);
+    const player = state.players.find((p) => p.id === userId);
     if (player === undefined) {
       return Response.error("Player not joined");
     }
-
-    const { x, y } = player.body;
-    const newPlatform = makeStaticBody(state.physics, x, y, PLAYER_WIDTH);
-    state.platforms.push(newPlatform);
-    state.players.forEach((p) => state.physics.add.collider(p.body, newPlatform));
+    const platform = makePlatform(state.physics, player.body.x, player.body.y, PLAYER_WIDTH);
+    state.platforms.push(platform);
+    state.players.forEach((p) => state.physics.add.collider(p.body, platform));
     player.body.x = 20;
     player.body.y = 20;
     return Response.ok();
   }
   getUserState(state: InternalState, userId: UserId): PlayerState {
     return {
-      players: state.players.map((player) => ({
-        id: player.id,
-        x: player.body.x,
-        y: player.body.y,
-      })),
-      platforms: state.platforms.map((platform) => ({
-        x: platform.x,
-        y: platform.y,
-        width: platform.width,
-      })),
+      players: state.players.map(({ id, body }) => ({ id, x: body.x, y: body.y })),
+      platforms: state.platforms,
     };
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {
@@ -95,9 +85,9 @@ export class Impl implements Methods<InternalState> {
     state.physics.world.update(ctx.time, timeDelta * 1000);
   }
 }
-function makeStaticBody(physics: ArcadePhysics, x: number, y: number, width: number) {
-  const p = physics.add.body(x, y, width, PLATFORM_HEIGHT);
-  p.allowGravity = false;
-  p.pushable = false;
-  return p;
+function makePlatform(physics: ArcadePhysics, x: number, y: number, width: number) {
+  const platform = physics.add.body(Math.round(x), Math.round(y), width, PLATFORM_HEIGHT);
+  platform.allowGravity = false;
+  platform.pushable = false;
+  return platform;
 }
