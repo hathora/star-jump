@@ -18,7 +18,7 @@ export class HelpScene extends Phaser.Scene {
     buffer: InterpolationBuffer<PlayerState>;
     connection: HathoraConnection;
   }) {
-    const keys = this.input.keyboard.on("keydown-ENTER", () => {
+    this.input.keyboard.on("keydown-ENTER", () => {
       this.scene.start("game", { connection, buffer, user });
     });
   }
