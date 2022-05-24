@@ -9,7 +9,6 @@ import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from "../utils";
 
 export class LoadScene extends Phaser.Scene {
   create() {
-    console.log("Loading scene");
     this.add
       .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, "Loading...", {
         fontSize: "50px",
@@ -39,7 +38,6 @@ function start(
   getConnection(client, token, ({ state, updatedAt }) => {
     if (buffer === undefined) {
       buffer = new InterpolationBuffer<PlayerState>(state, 50, lerp);
-      console.log("Starting help scene");
       scenePlugin.start("help", {
         connection,
         buffer,
