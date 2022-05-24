@@ -59,8 +59,6 @@ export class Impl implements Methods<InternalState> {
     const platform = makePlatform(state.physics, player.body.x, player.body.y, PLAYER_WIDTH);
     state.platforms.push(platform);
     state.players.forEach((p) => state.physics.add.collider(p.body, platform));
-    player.body.x = 20;
-    player.body.y = 20;
     return Response.ok();
   }
   getUserState(state: InternalState, userId: UserId): PlayerState {
