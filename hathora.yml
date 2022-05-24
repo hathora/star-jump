@@ -22,6 +22,7 @@ methods:
   joinGame:
   setInputs:
     inputs: Inputs
+  freeze:
 
 auth:
   anonymous: {}

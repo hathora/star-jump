@@ -45,6 +45,8 @@ export class GameScene extends Phaser.Scene {
         prevInputs = inputs;
       }
     }
+
+    this.input.keyboard.on("keydown-SPACE", () => connection.freeze({}));
     this.input.keyboard.on("keydown", handleKeyEvt);
     this.input.keyboard.on("keyup", handleKeyEvt);
   }
