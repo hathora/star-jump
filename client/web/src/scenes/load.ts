@@ -26,7 +26,7 @@ function start(client: HathoraClient, token: string, scenePlugin: Phaser.Scenes.
   getConnection(client, token, ({ state, updatedAt }) => {
     if (buffer === undefined) {
       buffer = new InterpolationBuffer<PlayerState>(state, 50, lerp);
-      scenePlugin.start("game", { connection, buffer, user: HathoraClient.getUserFromToken(token) });
+      scenePlugin.start("help", { connection, buffer, user: HathoraClient.getUserFromToken(token) });
     } else {
       buffer.enqueue(state, updatedAt);
     }
