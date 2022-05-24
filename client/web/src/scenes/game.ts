@@ -2,10 +2,7 @@ import { InterpolationBuffer } from "interpolation-buffer";
 import { UserData } from "../../../../api/base";
 import { Direction, PlayerState, UserId } from "../../../../api/types";
 import { HathoraConnection } from "../../../.hathora/client";
-
-const MAP_WIDTH = 1000;
-const MAP_HEIGHT = 800;
-const PLATFORM_HEIGHT = 32;
+import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
 
 export class GameScene extends Phaser.Scene {
   private user!: UserData;
