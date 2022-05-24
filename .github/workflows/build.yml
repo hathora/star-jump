@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: COORDINATOR_HOST=coordinator.hathora.com APP_SECRET=48544f60-0d23-4612-af5b-d3cef72ca824 hathora build --only client
+      - run: npm install hathora surge -g
+      - run: COORDINATOR_HOST=coordinator.hathora.com APP_SECRET=${{ secrets.APP_SECRET }} hathora build --only client
       - run: cp dist/client/web/index.html dist/client/web/200.html
       - run: surge dist/client/web phaser-hathora.surge.sh
         env:
