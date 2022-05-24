@@ -4,7 +4,7 @@
 - Physics running on the server using [phaser arcade-physics](https://github.com/yandeu/arcade-physics) at 20fps.
 - Server continuosly sychronizes state with clients.
 - Client rendering at 60fps using Phaser.
-- Client just renders based on server info with interpolation -- no physics running client side.sics running client side.
+- Client just renders based on server info with interpolation -- no physics running client side.
 
 
 ### Running
