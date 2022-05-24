@@ -69,7 +69,7 @@ export class GameScene extends Phaser.Scene {
       frameRate: 10,
     });
     this.anims.create({
-      key: "turn",
+      key: "idle",
       frames: [{ key: "player", frame: 4 }],
     });
     this.anims.create({
@@ -83,23 +83,9 @@ export class GameScene extends Phaser.Scene {
     const state = this.buffer.getInterpolatedState(Date.now());
     state.players.forEach(({ id, x, y }) => {
       if (!this.players.has(id)) {
-        const sprite = new Phaser.GameObjects.Sprite(this, x, y, "player").setOrigin(0, 0);
-        this.add.existing(sprite);
-        this.players.set(id, sprite);
-        if (id === this.user.id) {
-          this.cameras.main.startFollow(sprite);
-        }
+        this.addPlayer(id, x, y);
       } else {
-        const sprite = this.players.get(id)!;
-        if (x < sprite.x) {
-          sprite.anims.play("left", true);
-        } else if (x > sprite.x) {
-          sprite.anims.play("right", true);
-        } else {
-          sprite.anims.play("turn", true);
-        }
-        sprite.x = x;
-        sprite.y = y;
+        this.updatePlayer(id, x, y);
       }
     });
     state.platforms.forEach(({ x, y, width }) => {
@@ -108,5 +94,27 @@ export class GameScene extends Phaser.Scene {
         this.platforms.push({ x, y });
       }
     });
+  }
+
+  private addPlayer(id: string, x: number, y: number) {
+    const sprite = new Phaser.GameObjects.Sprite(this, x, y, "player").setOrigin(0, 0);
+    this.add.existing(sprite);
+    this.players.set(id, sprite);
+    if (id === this.user.id) {
+      this.cameras.main.startFollow(sprite);
+    }
+  }
+
+  private updatePlayer(id: string, x: number, y: number) {
+    const sprite = this.players.get(id)!;
+    if (x < sprite.x) {
+      sprite.anims.play("left", true);
+    } else if (x > sprite.x) {
+      sprite.anims.play("right", true);
+    } else {
+      sprite.anims.play("idle", true);
+    }
+    sprite.x = x;
+    sprite.y = y;
   }
 }
