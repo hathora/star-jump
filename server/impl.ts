@@ -5,6 +5,7 @@ import { Response } from "../api/base";
 import { PlayerState, UserId, ISetInputsRequest, Inputs, Direction } from "../api/types";
 import { Methods, Context } from "./.hathora/methods";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../shared/constants";
+import { generatePlatforms } from "./generator";
 
 type InternalPlayer = { id: UserId; body: Body; inputs: Inputs };
 type InternalState = {
@@ -14,7 +15,7 @@ type InternalState = {
 };
 
 export class Impl implements Methods<InternalState> {
-  initialize(): InternalState {
+  initialize(ctx: Context): InternalState {
     const config = {
       sys: {
         game: { config: {} },
@@ -23,10 +24,12 @@ export class Impl implements Methods<InternalState> {
       },
     };
     const physics = new ArcadePhysics(config);
-    const platforms = [];
-    platforms.push(physics.add.staticBody(200, 600, 400, PLATFORM_HEIGHT));
-    platforms.push(physics.add.staticBody(700, 700, 100, PLATFORM_HEIGHT));
-    return { physics, platforms, players: [] };
+    const platforms = generatePlatforms(MAP_WIDTH, MAP_HEIGHT, ctx.chance);
+    return {
+      physics,
+      platforms: platforms.map(({ x, y, width }) => physics.add.staticBody(x, y, width, PLATFORM_HEIGHT)),
+      players: [],
+    };
   }
   joinGame(state: InternalState, userId: string): Response {
     if (state.players.find((player) => player.id === userId) !== undefined) {
