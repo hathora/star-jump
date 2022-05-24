@@ -1,6 +1,6 @@
 import { InterpolationBuffer } from "interpolation-buffer";
 import { UserData } from "../../../../api/base";
-import { Direction, PlayerState, UserId } from "../../../../api/types";
+import { Direction, Inputs, PlayerState, UserId } from "../../../../api/types";
 import { HathoraConnection } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
 
@@ -33,31 +33,20 @@ export class GameScene extends Phaser.Scene {
 
     connection.joinGame({});
 
-    const keysDown: Set<string> = new Set();
-    function handleKeyEvt(e: KeyboardEvent) {
-      if (!["ArrowLeft", "ArrowRight", "ArrowUp"].includes(e.key)) {
-        return;
-      }
-      if (e.type === "keydown") {
-        if (keysDown.has(e.key)) {
-          return;
-        }
-        keysDown.add(e.key);
-      } else if (e.type === "keyup") {
-        keysDown.delete(e.key);
-      }
+    const keys = this.input.keyboard.createCursorKeys();
+    let prevInputs: Inputs | undefined;
+    function handleKeyEvt() {
       const inputs = {
-        horizontal: keysDown.has("ArrowLeft")
-          ? Direction.LEFT
-          : keysDown.has("ArrowRight")
-          ? Direction.RIGHT
-          : Direction.NONE,
-        up: keysDown.has("ArrowUp"),
+        horizontal: keys.left.isDown ? Direction.LEFT : keys.right.isDown ? Direction.RIGHT : Direction.NONE,
+        up: keys.up.isDown,
       };
-      connection.setInputs({ inputs });
+      if (prevInputs === undefined || JSON.stringify(inputs) !== JSON.stringify(prevInputs)) {
+        connection.setInputs({ inputs });
+        prevInputs = inputs;
+      }
     }
-    document.addEventListener("keydown", handleKeyEvt);
-    document.addEventListener("keyup", handleKeyEvt);
+    this.input.keyboard.on("keydown", handleKeyEvt);
+    this.input.keyboard.on("keyup", handleKeyEvt);
   }
 
   create() {
