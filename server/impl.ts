@@ -7,12 +7,13 @@ import { PlayerState, UserId, ISetInputsRequest, Inputs, Direction } from "../ap
 
 const MAP_WIDTH = 1000;
 const MAP_HEIGHT = 800;
+const PLATFORM_HEIGHT = 32;
 
 type InternalPlayer = { id: UserId; body: Body; inputs: Inputs };
 type InternalState = {
   physics: ArcadePhysics;
   platforms: StaticBody[];
-  entities: InternalPlayer[];
+  players: InternalPlayer[];
 };
 
 export class Impl implements Methods<InternalState> {
@@ -26,11 +27,12 @@ export class Impl implements Methods<InternalState> {
     };
     const physics = new ArcadePhysics(config);
     const platforms = [];
-    platforms.push(physics.add.staticBody(200, 500, 400, 32));
-    return { physics, platforms, entities: [] };
+    platforms.push(physics.add.staticBody(200, 600, 400, 32));
+    platforms.push(physics.add.staticBody(700, 700, 100, 32));
+    return { physics, platforms, players: [] };
   }
   joinGame(state: InternalState, userId: string): Response {
-    if (state.entities.find((entity) => entity.id === userId) !== undefined) {
+    if (state.players.find((player) => player.id === userId) !== undefined) {
       return Response.error("Already joined");
     }
     const playerBody = state.physics.add.body(20, 20, 32, 48);
@@ -38,12 +40,12 @@ export class Impl implements Methods<InternalState> {
     // @ts-ignore
     playerBody.setCollideWorldBounds(true);
     state.platforms.forEach((platform) => state.physics.add.collider(playerBody, platform));
-    state.entities.forEach((entity) => state.physics.add.collider(playerBody, entity.body));
-    state.entities.push({ id: userId, body: playerBody, inputs: { horizontal: Direction.NONE, up: false } });
+    state.players.forEach((player) => state.physics.add.collider(playerBody, player.body));
+    state.players.push({ id: userId, body: playerBody, inputs: { horizontal: Direction.NONE, up: false } });
     return Response.ok();
   }
   setInputs(state: InternalState, userId: UserId, ctx: Context, request: ISetInputsRequest): Response {
-    const player = state.entities.find((entity) => entity.id === userId);
+    const player = state.players.find((player) => player.id === userId);
     if (player === undefined) {
       return Response.error("Player not joined");
     }
@@ -52,15 +54,20 @@ export class Impl implements Methods<InternalState> {
   }
   getUserState(state: InternalState, userId: UserId): PlayerState {
     return {
-      entities: state.entities.map((entity) => ({
-        id: entity.id,
-        x: entity.body.x,
-        y: entity.body.y,
+      players: state.players.map((player) => ({
+        id: player.id,
+        x: player.body.x,
+        y: player.body.y,
+      })),
+      platforms: state.platforms.map((platform) => ({
+        x: platform.x,
+        y: platform.y,
+        width: platform.width,
       })),
     };
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {
-    state.entities.forEach(({ inputs, body }) => {
+    state.players.forEach(({ inputs, body }) => {
       if (inputs.horizontal === Direction.LEFT) {
         body.setVelocityX(-300);
       } else if (inputs.horizontal === Direction.RIGHT) {

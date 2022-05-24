@@ -10,8 +10,13 @@ types:
     id: UserId
     x: float
     y: float
+  Platform:
+    x: int
+    y: int
+    width: int
   PlayerState:
-    entities: Player[]
+    players: Player[]
+    platforms: Platform[]
 
 methods:
   joinGame:
