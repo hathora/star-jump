@@ -14,10 +14,9 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.image(400, 300, "sky");
+    this.add.image(0, 0, "sky").setOrigin(0, 0);
 
-    const platform = this.add.rectangle(200, 500, 400, 32, 0x00ff00);
-    platform.setOrigin(0, 0);
+    this.add.rectangle(200, 500, 400, 32, 0x00ff00).setOrigin(0, 0);
 
     this.anims.create({
       key: "left",
@@ -42,8 +41,7 @@ class GameScene extends Phaser.Scene {
     const state = buffer.getInterpolatedState(Date.now());
     state.entities.forEach(({ id, x, y }) => {
       if (!entities.has(id)) {
-        const sprite = new Phaser.GameObjects.Sprite(this, x, y, "player");
-        sprite.setOrigin(0, 0);
+        const sprite = new Phaser.GameObjects.Sprite(this, x, y, "player").setOrigin(0, 0);
         this.add.existing(sprite);
         entities.set(id, sprite);
       } else {
