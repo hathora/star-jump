@@ -3,7 +3,7 @@ import { Body } from "arcade-physics/lib/physics/arcade/Body";
 import { StaticBody } from "arcade-physics/lib/physics/arcade/StaticBody";
 import { Methods, Context } from "./.hathora/methods";
 import { Response } from "../api/base";
-import { PlayerState, UserId, ISetInputsRequest, Inputs } from "../api/types";
+import { PlayerState, UserId, ISetInputsRequest, Inputs, Direction } from "../api/types";
 
 type InternalPlayer = { id: UserId; body: Body; inputs: Inputs };
 type InternalState = {
@@ -36,7 +36,7 @@ export class Impl implements Methods<InternalState> {
     playerBody.setCollideWorldBounds(true);
     state.platforms.forEach((platform) => state.physics.add.collider(playerBody, platform));
     state.entities.forEach((entity) => state.physics.add.collider(playerBody, entity.body));
-    state.entities.push({ id: userId, body: playerBody, inputs: { left: false, right: false, up: false } });
+    state.entities.push({ id: userId, body: playerBody, inputs: { horizontal: Direction.NONE, up: false } });
     return Response.ok();
   }
   setInputs(state: InternalState, userId: UserId, ctx: Context, request: ISetInputsRequest): Response {
@@ -58,9 +58,9 @@ export class Impl implements Methods<InternalState> {
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {
     state.entities.forEach(({ inputs, body }) => {
-      if (inputs.left) {
+      if (inputs.horizontal === Direction.LEFT) {
         body.setVelocityX(-300);
-      } else if (inputs.right) {
+      } else if (inputs.horizontal === Direction.RIGHT) {
         body.setVelocityX(300);
       } else {
         body.setVelocityX(0);

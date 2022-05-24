@@ -1,7 +1,10 @@
 types:
+  Direction:
+    - NONE
+    - LEFT
+    - RIGHT
   Inputs:
-    left: boolean
-    right: boolean
+    horizontal: Direction
     up: boolean
   Player:
     id: UserId

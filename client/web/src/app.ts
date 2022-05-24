@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { InterpolationBuffer } from "interpolation-buffer";
 import { HathoraClient, UpdateArgs } from "../../.hathora/client";
-import { Player, PlayerState, UserId } from "../../../api/types";
+import { Direction, Player, PlayerState, UserId } from "../../../api/types";
 
 const client = new HathoraClient();
 let buffer: InterpolationBuffer<PlayerState> | undefined;
@@ -102,8 +102,11 @@ async function setupApp() {
       keysDown.delete(e.key);
     }
     const inputs = {
-      left: keysDown.has("ArrowLeft"),
-      right: keysDown.has("ArrowRight"),
+      horizontal: keysDown.has("ArrowLeft")
+        ? Direction.LEFT
+        : keysDown.has("ArrowRight")
+        ? Direction.RIGHT
+        : Direction.NONE,
       up: keysDown.has("ArrowUp"),
     };
     connection.setInputs({ inputs });
