@@ -1,11 +1,15 @@
 types:
-  Direction:
+  XDirection:
     - NONE
     - LEFT
     - RIGHT
+  YDirection:
+    - NONE
+    - UP
+    - DOWN
   Inputs:
-    horizontal: Direction
-    up: boolean
+    horizontal: XDirection
+    vertical: YDirection
   Player:
     id: UserId
     x: float

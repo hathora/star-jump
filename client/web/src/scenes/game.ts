@@ -1,6 +1,6 @@
 import { InterpolationBuffer } from "interpolation-buffer";
 import { UserData } from "../../../../api/base";
-import { Direction, Inputs, PlayerState, UserId } from "../../../../api/types";
+import { Inputs, PlayerState, UserId, XDirection, YDirection } from "../../../../api/types";
 import { HathoraConnection } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
 
@@ -36,9 +36,9 @@ export class GameScene extends Phaser.Scene {
     const keys = this.input.keyboard.createCursorKeys();
     let prevInputs: Inputs | undefined;
     function handleKeyEvt() {
-      const inputs = {
-        horizontal: keys.left.isDown ? Direction.LEFT : keys.right.isDown ? Direction.RIGHT : Direction.NONE,
-        up: keys.up.isDown,
+      const inputs: Inputs = {
+        horizontal: keys.left.isDown ? XDirection.LEFT : keys.right.isDown ? XDirection.RIGHT : XDirection.NONE,
+        vertical: keys.up.isDown ? YDirection.UP : keys.down.isDown ? YDirection.DOWN : YDirection.NONE,
       };
       if (prevInputs === undefined || JSON.stringify(inputs) !== JSON.stringify(prevInputs)) {
         connection.setInputs({ inputs });

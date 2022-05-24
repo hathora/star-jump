@@ -1,7 +1,7 @@
 import { ArcadePhysics } from "arcade-physics";
 import { Body } from "arcade-physics/lib/physics/arcade/Body";
 import { Response } from "../api/base";
-import { PlayerState, UserId, ISetInputsRequest, Inputs, Direction, IFreezeRequest } from "../api/types";
+import { PlayerState, UserId, ISetInputsRequest, Inputs, IFreezeRequest, XDirection, YDirection } from "../api/types";
 import { Methods, Context } from "./.hathora/methods";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT, PLAYER_HEIGHT, PLAYER_WIDTH } from "../shared/constants";
 import { generatePlatforms } from "./generator";
@@ -40,7 +40,11 @@ export class Impl implements Methods<InternalState> {
     playerBody.setCollideWorldBounds(true);
     state.platforms.forEach((platform) => state.physics.add.collider(playerBody, platform));
     state.players.forEach((player) => state.physics.add.collider(playerBody, player.body));
-    state.players.push({ id: userId, body: playerBody, inputs: { horizontal: Direction.NONE, up: false } });
+    state.players.push({
+      id: userId,
+      body: playerBody,
+      inputs: { horizontal: XDirection.NONE, vertical: YDirection.NONE },
+    });
     return Response.ok();
   }
   setInputs(state: InternalState, userId: UserId, ctx: Context, request: ISetInputsRequest): Response {
@@ -69,15 +73,17 @@ export class Impl implements Methods<InternalState> {
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {
     state.players.forEach(({ inputs, body }) => {
-      if (inputs.horizontal === Direction.LEFT) {
+      if (inputs.horizontal === XDirection.LEFT) {
         body.setVelocityX(-300);
-      } else if (inputs.horizontal === Direction.RIGHT) {
+      } else if (inputs.horizontal === XDirection.RIGHT) {
         body.setVelocityX(300);
       } else {
         body.setVelocityX(0);
       }
-      if (inputs.up && body.blocked.down) {
-        body.setVelocityY(-250);
+      if (inputs.vertical === YDirection.UP && body.blocked.down) {
+        body.setVelocityY(-300);
+      } else if (inputs.vertical === YDirection.DOWN) {
+        body.setVelocityY(300);
       }
     });
     state.physics.world.update(ctx.time, timeDelta * 1000);
