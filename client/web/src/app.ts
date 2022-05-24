@@ -2,20 +2,29 @@ import Phaser from "phaser";
 import { InterpolationBuffer } from "interpolation-buffer";
 import { HathoraClient, UpdateArgs } from "../../.hathora/client";
 import { Direction, Player, PlayerState, UserId } from "../../../api/types";
+import { UserData } from "../../../api/base";
+
+const MAP_WIDTH = 1000;
+const MAP_HEIGHT = 800;
+const VIEWPORT_WIDTH = 800;
+const VIEWPORT_HEIGHT = 600;
 
 const client = new HathoraClient();
 let buffer: InterpolationBuffer<PlayerState> | undefined;
 const entities: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
 
 class GameScene extends Phaser.Scene {
+  private user!: UserData;
+
   preload() {
-    this.load.image("sky", "/sky.png");
     this.load.spritesheet("player", "/dude.png", { frameWidth: 32, frameHeight: 48 });
+
+    const token = sessionStorage.getItem("token")!;
+    this.user = HathoraClient.getUserFromToken(token);
   }
 
   create() {
-    this.add.image(0, 0, "sky").setOrigin(0, 0);
-
+    this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT);
     this.add.rectangle(200, 500, 400, 32, 0x00ff00).setOrigin(0, 0);
 
     this.anims.create({
@@ -44,6 +53,9 @@ class GameScene extends Phaser.Scene {
         const sprite = new Phaser.GameObjects.Sprite(this, x, y, "player").setOrigin(0, 0);
         this.add.existing(sprite);
         entities.set(id, sprite);
+        if (id === this.user.id) {
+          this.cameras.main.startFollow(sprite);
+        }
       } else {
         const sprite = entities.get(id)!;
         if (x < sprite.x) {
@@ -62,8 +74,9 @@ class GameScene extends Phaser.Scene {
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: VIEWPORT_WIDTH,
+  height: VIEWPORT_HEIGHT,
+  backgroundColor: "#4488aa",
   scene: GameScene,
 };
 

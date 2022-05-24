@@ -5,6 +5,9 @@ import { Methods, Context } from "./.hathora/methods";
 import { Response } from "../api/base";
 import { PlayerState, UserId, ISetInputsRequest, Inputs, Direction } from "../api/types";
 
+const MAP_WIDTH = 1000;
+const MAP_HEIGHT = 800;
+
 type InternalPlayer = { id: UserId; body: Body; inputs: Inputs };
 type InternalState = {
   physics: ArcadePhysics;
@@ -18,7 +21,7 @@ export class Impl implements Methods<InternalState> {
       sys: {
         game: { config: {} },
         settings: { physics: { gravity: { y: 300 } } },
-        scale: { width: 800, height: 600 },
+        scale: { width: MAP_WIDTH, height: MAP_HEIGHT },
       },
     };
     const physics = new ArcadePhysics(config);
