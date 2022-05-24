@@ -1,16 +1,15 @@
 import { ArcadePhysics } from "arcade-physics";
 import { Body } from "arcade-physics/lib/physics/arcade/Body";
-import { StaticBody } from "arcade-physics/lib/physics/arcade/StaticBody";
 import { Response } from "../api/base";
-import { PlayerState, UserId, ISetInputsRequest, Inputs, Direction } from "../api/types";
+import { PlayerState, UserId, ISetInputsRequest, Inputs, Direction, IFreezeRequest } from "../api/types";
 import { Methods, Context } from "./.hathora/methods";
-import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../shared/constants";
+import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT, PLAYER_HEIGHT, PLAYER_WIDTH } from "../shared/constants";
 import { generatePlatforms } from "./generator";
 
 type InternalPlayer = { id: UserId; body: Body; inputs: Inputs };
 type InternalState = {
   physics: ArcadePhysics;
-  platforms: StaticBody[];
+  platforms: Body[];
   players: InternalPlayer[];
 };
 
@@ -27,7 +26,7 @@ export class Impl implements Methods<InternalState> {
     const platforms = generatePlatforms(MAP_WIDTH, MAP_HEIGHT, ctx.chance);
     return {
       physics,
-      platforms: platforms.map(({ x, y, width }) => physics.add.staticBody(x, y, width, PLATFORM_HEIGHT)),
+      platforms: platforms.map(({ x, y, width }) => makeStaticBody(physics, x, y, width)),
       players: [],
     };
   }
@@ -35,7 +34,7 @@ export class Impl implements Methods<InternalState> {
     if (state.players.find((player) => player.id === userId) !== undefined) {
       return Response.error("Already joined");
     }
-    const playerBody = state.physics.add.body(20, 20, 32, 48);
+    const playerBody = state.physics.add.body(20, 20, PLAYER_WIDTH, PLAYER_HEIGHT);
     playerBody.pushable = false;
     // @ts-ignore
     playerBody.setCollideWorldBounds(true);
@@ -50,6 +49,20 @@ export class Impl implements Methods<InternalState> {
       return Response.error("Player not joined");
     }
     player.inputs = request.inputs;
+    return Response.ok();
+  }
+  freeze(state: InternalState, userId: string, ctx: Context, request: IFreezeRequest): Response {
+    const player = state.players.find((player) => player.id === userId);
+    if (player === undefined) {
+      return Response.error("Player not joined");
+    }
+
+    const { x, y } = player.body;
+    const newPlatform = makeStaticBody(state.physics, x, y, PLAYER_WIDTH);
+    state.platforms.push(newPlatform);
+    state.players.forEach((p) => state.physics.add.collider(p.body, newPlatform));
+    player.body.x = 20;
+    player.body.y = 20;
     return Response.ok();
   }
   getUserState(state: InternalState, userId: UserId): PlayerState {
@@ -81,4 +94,10 @@ export class Impl implements Methods<InternalState> {
     });
     state.physics.world.update(ctx.time, timeDelta * 1000);
   }
+}
+function makeStaticBody(physics: ArcadePhysics, x: number, y: number, width: number) {
+  const p = physics.add.body(x, y, width, PLATFORM_HEIGHT);
+  p.allowGravity = false;
+  p.pushable = false;
+  return p;
 }
