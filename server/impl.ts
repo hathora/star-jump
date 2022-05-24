@@ -66,7 +66,7 @@ export class Impl implements Methods<InternalState> {
   getUserState(state: InternalState, userId: UserId): PlayerState {
     return {
       players: state.players.map(({ id, body }) => ({ id, x: body.x, y: body.y })),
-      platforms: state.platforms,
+      platforms: state.platforms.map(({ x, y, width }) => ({ x, y, width })),
     };
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {
