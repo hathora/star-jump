@@ -5,9 +5,6 @@ import { HathoraConnection } from "../../../.hathora/client";
 import { VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from "../utils";
 
 export class HelpScene extends Phaser.Scene {
-  private user!: UserData;
-  private buffer!: InterpolationBuffer<PlayerState>;
-  private connection!: HathoraConnection;
   constructor() {
     super("help");
   }
@@ -21,9 +18,6 @@ export class HelpScene extends Phaser.Scene {
     buffer: InterpolationBuffer<PlayerState>;
     connection: HathoraConnection;
   }) {
-    this.user = user;
-    this.buffer = buffer;
-    this.connection = connection;
     const keys = this.input.keyboard.on("keydown-ENTER", () => {
       this.scene.start("game", { connection, buffer, user });
     });
