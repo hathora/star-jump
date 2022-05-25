@@ -4,7 +4,7 @@ import { Response } from "../api/base";
 import { PlayerState, UserId, ISetInputsRequest, Inputs, IFreezeRequest, XDirection, YDirection } from "../api/types";
 import { Methods, Context } from "./.hathora/methods";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT, PLAYER_HEIGHT, PLAYER_WIDTH } from "../shared/constants";
-import { generatePlatforms } from "./generator";
+import { BORDER_RADIUS, generatePlatforms } from "./map";
 
 type InternalPlayer = { id: UserId; body: Body; inputs: Inputs };
 type InternalState = {
@@ -34,7 +34,7 @@ export class Impl implements Methods<InternalState> {
     if (state.players.find((player) => player.id === userId) !== undefined) {
       return Response.error("Already joined");
     }
-    const playerBody = state.physics.add.body(20, 20, PLAYER_WIDTH, PLAYER_HEIGHT);
+    const playerBody = state.physics.add.body(0, MAP_HEIGHT - BORDER_RADIUS, PLAYER_WIDTH, PLAYER_HEIGHT);
     playerBody.pushable = false;
     // @ts-ignore
     playerBody.setCollideWorldBounds(true);
@@ -59,6 +59,9 @@ export class Impl implements Methods<InternalState> {
     const player = state.players.find((p) => p.id === userId);
     if (player === undefined) {
       return Response.error("Player not joined");
+    }
+    if (player.body.y < BORDER_RADIUS || player.body.y > MAP_HEIGHT - BORDER_RADIUS) {
+      return Response.error("Too close to border");
     }
     const platform = makePlatform(state.physics, player.body.x, player.body.y, PLAYER_WIDTH);
     state.platforms.push(platform);
