@@ -17,6 +17,7 @@ export class GameScene extends Phaser.Scene {
 
   preload() {
     this.load.spritesheet("player", "/dude.png", { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet("platform", "/tile.png", { frameWidth: 18, frameHeight: 18 });
   }
 
   init({
@@ -81,7 +82,9 @@ export class GameScene extends Phaser.Scene {
     });
     state.platforms.forEach(({ x, y, width }) => {
       if (this.platforms.find((platform) => platform.x === x && platform.y === y) === undefined) {
-        this.add.rectangle(x, y, width, PLATFORM_HEIGHT, 0x00ff00).setOrigin(0, 0);
+        const sprite = new Phaser.GameObjects.TileSprite(this, x, y, width, PLATFORM_HEIGHT, "platform");
+        sprite.setOrigin(0, 0);
+        this.add.existing(sprite);
         this.platforms.push({ x, y });
       }
     });
