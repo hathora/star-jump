@@ -29,7 +29,8 @@ export class HelpScene extends Phaser.Scene {
         VIEWPORT_WIDTH / 2,
         VIEWPORT_HEIGHT / 2,
         `Move around with the arrow keys.
-Press space to turn into a platform.
+Press space to die and turn into a platform.
+Get to the top and collect the star.
 
 Press enter to start.`,
         { fontSize: "30px" }
