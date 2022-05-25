@@ -18,9 +18,9 @@ export class GameScene extends Phaser.Scene {
 
   preload() {
     this.load.spritesheet("player", "/dude.png", { frameWidth: 32, frameHeight: 48 });
-    this.load.image("platform", "/brickBrown.png");
+    this.load.image("platform", "/brick.png");
     this.load.image("star", "/star.png");
-    this.load.image("background", "/colored_grass.png");
+    this.load.image("background", "/background.png");
   }
 
   init({
