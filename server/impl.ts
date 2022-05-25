@@ -15,7 +15,12 @@ import { Methods, Context } from "./.hathora/methods";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT, PLAYER_HEIGHT, PLAYER_WIDTH } from "../shared/constants";
 import { BORDER_RADIUS, generatePlatforms } from "./map";
 
-type InternalPlayer = { id: UserId; body: Body; inputs: Inputs };
+type InternalPlayer = {
+  id: UserId;
+  body: Body;
+  inputs: Inputs;
+  freezeTimer: number;
+};
 type InternalState = {
   physics: ArcadePhysics;
   platforms: Body[];
@@ -60,6 +65,7 @@ export class Impl implements Methods<InternalState> {
       id: userId,
       body: playerBody,
       inputs: { horizontal: XDirection.NONE, vertical: YDirection.NONE },
+      freezeTimer: 0,
     });
     return Response.ok();
   }
@@ -67,6 +73,9 @@ export class Impl implements Methods<InternalState> {
     const player = state.players.find((p) => p.id === userId);
     if (player === undefined) {
       return Response.error("Player not joined");
+    }
+    if (player.freezeTimer > 0) {
+      return Response.error("Frozen");
     }
     player.inputs = request.inputs;
     return Response.ok();
@@ -76,12 +85,17 @@ export class Impl implements Methods<InternalState> {
     if (player === undefined) {
       return Response.error("Player not joined");
     }
+    if (player.freezeTimer > 0) {
+      return Response.error("Frozen");
+    }
     if (player.body.y < BORDER_RADIUS || player.body.y > MAP_HEIGHT - BORDER_RADIUS) {
       return Response.error("Too close to border");
     }
     const platform = makePlatform(state.physics, player.body.x, player.body.y, PLAYER_WIDTH);
     state.platforms.push(platform);
     state.players.forEach((p) => state.physics.add.collider(p.body, platform));
+    player.body.moves = false;
+    player.freezeTimer = 5;
     return Response.ok();
   }
   getUserState(state: InternalState, userId: UserId): PlayerState {
@@ -92,18 +106,26 @@ export class Impl implements Methods<InternalState> {
     };
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {
-    state.players.forEach(({ inputs, body }) => {
-      if (inputs.horizontal === XDirection.LEFT && !body.blocked.left) {
-        body.setVelocityX(-300);
-      } else if (inputs.horizontal === XDirection.RIGHT && !body.blocked.right) {
-        body.setVelocityX(300);
-      } else if (inputs.horizontal === XDirection.NONE) {
-        body.setVelocityX(0);
+    state.players.forEach((player) => {
+      if (player.inputs.horizontal === XDirection.LEFT && !player.body.blocked.left) {
+        player.body.setVelocityX(-300);
+      } else if (player.inputs.horizontal === XDirection.RIGHT && !player.body.blocked.right) {
+        player.body.setVelocityX(300);
+      } else if (player.inputs.horizontal === XDirection.NONE) {
+        player.body.setVelocityX(0);
       }
-      if (inputs.vertical === YDirection.UP && body.blocked.down) {
-        body.setVelocityY(-300);
-      } else if (inputs.vertical === YDirection.DOWN && !body.blocked.down) {
-        body.setVelocityY(300);
+      if (player.inputs.vertical === YDirection.UP && player.body.blocked.down) {
+        player.body.setVelocityY(-300);
+      } else if (player.inputs.vertical === YDirection.DOWN && !player.body.blocked.down) {
+        player.body.setVelocityY(300);
+      }
+
+      if (player.freezeTimer > 0) {
+        player.freezeTimer -= timeDelta;
+        if (player.freezeTimer < 0) {
+          player.freezeTimer = 0;
+          player.body.moves = true;
+        }
       }
     });
 
