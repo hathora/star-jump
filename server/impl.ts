@@ -1,7 +1,16 @@
 import { ArcadePhysics } from "arcade-physics";
 import { Body } from "arcade-physics/lib/physics/arcade/Body";
 import { Response } from "../api/base";
-import { PlayerState, UserId, ISetInputsRequest, Inputs, IFreezeRequest, XDirection, YDirection } from "../api/types";
+import {
+  PlayerState,
+  UserId,
+  ISetInputsRequest,
+  Inputs,
+  IFreezeRequest,
+  XDirection,
+  YDirection,
+  Star,
+} from "../api/types";
 import { Methods, Context } from "./.hathora/methods";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT, PLAYER_HEIGHT, PLAYER_WIDTH } from "../shared/constants";
 import { BORDER_RADIUS, generatePlatforms } from "./map";
@@ -11,6 +20,7 @@ type InternalState = {
   physics: ArcadePhysics;
   platforms: Body[];
   players: InternalPlayer[];
+  star: Star;
 };
 
 export class Impl implements Methods<InternalState> {
@@ -28,6 +38,7 @@ export class Impl implements Methods<InternalState> {
       physics,
       platforms: platforms.map(({ x, y, width }) => makePlatform(physics, x, y, width)),
       players: [],
+      star: { x: ctx.chance.natural({ max: MAP_WIDTH }), y: 0 },
     };
   }
   joinGame(state: InternalState, userId: string, ctx: Context): Response {
@@ -77,6 +88,7 @@ export class Impl implements Methods<InternalState> {
     return {
       players: state.players.map(({ id, body }) => ({ id, x: body.x, y: body.y })),
       platforms: state.platforms.map(({ x, y, width }) => ({ x, y, width })),
+      star: state.star,
     };
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {

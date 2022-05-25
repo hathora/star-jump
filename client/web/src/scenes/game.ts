@@ -1,6 +1,6 @@
 import { InterpolationBuffer } from "interpolation-buffer";
 import { UserData } from "../../../../api/base";
-import { Inputs, PlayerState, UserId, XDirection, YDirection } from "../../../../api/types";
+import { Inputs, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
 import { HathoraConnection } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
 
@@ -10,6 +10,7 @@ export class GameScene extends Phaser.Scene {
 
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
   private platforms: { x: number; y: number }[] = [];
+  private star: Star | undefined;
 
   constructor() {
     super("game");
@@ -18,6 +19,7 @@ export class GameScene extends Phaser.Scene {
   preload() {
     this.load.spritesheet("player", "/dude.png", { frameWidth: 32, frameHeight: 48 });
     this.load.image("platform", "/brickBrown.png");
+    this.load.image("star", "/star.png");
     this.load.image("background", "/colored_grass.png");
   }
 
@@ -84,12 +86,16 @@ export class GameScene extends Phaser.Scene {
     });
     state.platforms.forEach(({ x, y, width }) => {
       if (this.platforms.find((platform) => platform.x === x && platform.y === y) === undefined) {
-        const sprite = new Phaser.GameObjects.TileSprite(this, x, y, width * 4, PLATFORM_HEIGHT * 4, "platform");
-        sprite.setScale(0.25, 0.25).setOrigin(0, 0);
+        const sprite = new Phaser.GameObjects.TileSprite(this, x, y, width, PLATFORM_HEIGHT, "platform");
+        sprite.setTileScale(0.25, 0.25).setOrigin(0, 0);
         this.add.existing(sprite);
         this.platforms.push({ x, y });
       }
     });
+    if (this.star === undefined) {
+      this.star = state.star;
+      this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
+    }
   }
 
   private addPlayer(id: string, x: number, y: number) {

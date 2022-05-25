@@ -18,9 +18,13 @@ types:
     x: int
     y: int
     width: int
+  Star:
+    x: int
+    y: int
   PlayerState:
     players: Player[]
     platforms: Platform[]
+    star: Star
 
 methods:
   joinGame:
