@@ -73,25 +73,35 @@ export class Impl implements Methods<InternalState> {
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {
     state.players.forEach(({ inputs, body }) => {
-      if (inputs.horizontal === XDirection.LEFT) {
+      if (inputs.horizontal === XDirection.LEFT && !body.blocked.left) {
         body.setVelocityX(-300);
-      } else if (inputs.horizontal === XDirection.RIGHT) {
+      } else if (inputs.horizontal === XDirection.RIGHT && !body.blocked.right) {
         body.setVelocityX(300);
-      } else {
+      } else if (inputs.horizontal === XDirection.NONE) {
         body.setVelocityX(0);
       }
       if (inputs.vertical === YDirection.UP && body.blocked.down) {
         body.setVelocityY(-300);
-      } else if (inputs.vertical === YDirection.DOWN) {
+      } else if (inputs.vertical === YDirection.DOWN && !body.blocked.down) {
         body.setVelocityY(300);
       }
     });
+
+    if (state.players.every((player) => atRest(player.body))) {
+      return;
+    }
+
     state.physics.world.update(ctx.time, timeDelta * 1000);
   }
 }
+
 function makePlatform(physics: ArcadePhysics, x: number, y: number, width: number) {
   const platform = physics.add.body(Math.round(x), Math.round(y), width, PLATFORM_HEIGHT);
   platform.allowGravity = false;
   platform.pushable = false;
   return platform;
+}
+
+function atRest(body: Body) {
+  return body.velocity.x === 0 && body.velocity.y === 0 && body.blocked.down;
 }
