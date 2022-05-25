@@ -87,7 +87,7 @@ export class Impl implements Methods<InternalState> {
       }
     });
 
-    if (state.players.every((player) => atRest(player.body))) {
+    if (state.players.every(({ body }) => body.velocity.x === 0 && body.velocity.y === 0 && body.blocked.down)) {
       return;
     }
 
@@ -100,8 +100,4 @@ function makePlatform(physics: ArcadePhysics, x: number, y: number, width: numbe
   platform.allowGravity = false;
   platform.pushable = false;
   return platform;
-}
-
-function atRest(body: Body) {
-  return body.velocity.x === 0 && body.velocity.y === 0 && body.blocked.down;
 }
