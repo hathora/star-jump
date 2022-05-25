@@ -30,11 +30,16 @@ export class Impl implements Methods<InternalState> {
       players: [],
     };
   }
-  joinGame(state: InternalState, userId: string): Response {
+  joinGame(state: InternalState, userId: string, ctx: Context): Response {
     if (state.players.find((player) => player.id === userId) !== undefined) {
       return Response.error("Already joined");
     }
-    const playerBody = state.physics.add.body(0, MAP_HEIGHT - BORDER_RADIUS, PLAYER_WIDTH, PLAYER_HEIGHT);
+    const playerBody = state.physics.add.body(
+      ctx.chance.natural({ max: MAP_WIDTH }),
+      MAP_HEIGHT - BORDER_RADIUS,
+      PLAYER_WIDTH,
+      PLAYER_HEIGHT
+    );
     playerBody.pushable = false;
     // @ts-ignore
     playerBody.setCollideWorldBounds(true);
