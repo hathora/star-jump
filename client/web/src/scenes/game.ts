@@ -17,7 +17,8 @@ export class GameScene extends Phaser.Scene {
 
   preload() {
     this.load.spritesheet("player", "/dude.png", { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet("platform", "/tile.png", { frameWidth: 18, frameHeight: 18 });
+    this.load.image("platform", "/brickBrown.png");
+    this.load.image("background", "/colored_grass.png");
   }
 
   init({
@@ -54,6 +55,7 @@ export class GameScene extends Phaser.Scene {
 
   create() {
     this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT);
+    this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
 
     this.anims.create({
       key: "left",
@@ -82,8 +84,8 @@ export class GameScene extends Phaser.Scene {
     });
     state.platforms.forEach(({ x, y, width }) => {
       if (this.platforms.find((platform) => platform.x === x && platform.y === y) === undefined) {
-        const sprite = new Phaser.GameObjects.TileSprite(this, x, y, width, PLATFORM_HEIGHT, "platform");
-        sprite.setOrigin(0, 0);
+        const sprite = new Phaser.GameObjects.TileSprite(this, x, y, width * 4, PLATFORM_HEIGHT * 4, "platform");
+        sprite.setScale(0.25, 0.25).setOrigin(0, 0);
         this.add.existing(sprite);
         this.platforms.push({ x, y });
       }
