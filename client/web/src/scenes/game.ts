@@ -98,7 +98,7 @@ export class GameScene extends Phaser.Scene {
         this.platforms.push({ x, y });
       }
     });
-    if (this.star === undefined) {
+    if (this.star === undefined && state.star !== undefined) {
       this.star = state.star;
       this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
     }
