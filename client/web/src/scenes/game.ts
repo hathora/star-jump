@@ -13,7 +13,7 @@ export class GameScene extends Phaser.Scene {
   private platforms: { x: number; y: number }[] = [];
   private star: Star | undefined;
 
-  private jumpSound: Phaser.Sound.BaseSound;
+  private jumpSound!: Phaser.Sound.BaseSound;
 
   private idleCount = 0;
 
@@ -26,7 +26,7 @@ export class GameScene extends Phaser.Scene {
     this.load.image("platform", "/brick.png");
     this.load.image("star", "/star.png");
     this.load.image("background", "/background.png");
-    this.load.audio("jump", "/jump.wav");
+    this.load.audio("jump", "/jump.mp3");
   }
 
   init({
