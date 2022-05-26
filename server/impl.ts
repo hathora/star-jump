@@ -74,9 +74,6 @@ export class Impl implements Methods<InternalState> {
     if (player === undefined) {
       return Response.error("Player not joined");
     }
-    if (player.freezeTimer > 0) {
-      return Response.error("Frozen");
-    }
     player.inputs = request.inputs;
     return Response.ok();
   }
