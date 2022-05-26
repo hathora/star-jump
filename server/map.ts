@@ -1,3 +1,5 @@
+import { PLATFORM_HEIGHT } from "../shared/constants";
+
 type Platform = { x: number; y: number; width: number };
 
 export const BORDER_RADIUS = 64;
@@ -8,7 +10,8 @@ export function generatePlatforms(mapWidth: number, mapHeight: number, chance: C
   const platforms: Platform[] = [];
   for (let i = 0; i < numPlatforms; i++) {
     const x = chance.natural({ max: mapWidth });
-    const y = chance.natural({ min: BORDER_RADIUS, max: mapHeight - BORDER_RADIUS });
+    const y =
+      (chance.natural({ min: BORDER_RADIUS, max: mapHeight - BORDER_RADIUS }) / PLATFORM_HEIGHT) * PLATFORM_HEIGHT;
     const width = chance.pickone(PLATFORM_WIDTHS);
     platforms.push({ x, y, width });
   }
