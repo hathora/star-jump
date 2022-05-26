@@ -50,6 +50,7 @@ function lerp(from: PlayerState, to: PlayerState, pctElapsed: number): PlayerSta
       return fromPlayer !== undefined ? lerpPlayer(fromPlayer, toPlayer, pctElapsed) : toPlayer;
     }),
     platforms: to.platforms,
+    star: to.star,
   };
 }
 
