@@ -1,6 +1,6 @@
 import { InterpolationBuffer } from "interpolation-buffer";
 import { UserData } from "../../../../api/base";
-import { Inputs, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
+import { Inputs, Platform, Player, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
 import { HathoraConnection } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
 
@@ -64,12 +64,11 @@ export class GameScene extends Phaser.Scene {
     this.anims.create({
       key: "idle",
       frames: this.anims.generateFrameNumbers("player", { start: 0, end: 10 }),
-      frameRate: 10,
+      frameRate: 15,
     });
     this.anims.create({
       key: "walk",
       frames: this.anims.generateFrameNumbers("player", { start: 11, end: 22 }),
-      frameRate: 10,
     });
     this.anims.create({
       key: "jump",
@@ -83,19 +82,16 @@ export class GameScene extends Phaser.Scene {
 
   update() {
     const state = this.buffer.getInterpolatedState(Date.now());
-    state.players.forEach(({ id, x, y }) => {
-      if (!this.players.has(id)) {
-        this.addPlayer(id, x, y);
+    state.players.forEach((player) => {
+      if (!this.players.has(player.id)) {
+        this.addPlayer(player);
       } else {
-        this.updatePlayer(id, x, y);
+        this.updatePlayer(player);
       }
     });
-    state.platforms.forEach(({ x, y, width }) => {
-      if (this.platforms.find((platform) => platform.x === x && platform.y === y) === undefined) {
-        const sprite = new Phaser.GameObjects.TileSprite(this, x, y, width, PLATFORM_HEIGHT, "platform");
-        sprite.setTileScale(0.25, 0.25).setOrigin(0, 0);
-        this.add.existing(sprite);
-        this.platforms.push({ x, y });
+    state.platforms.forEach((platform) => {
+      if (this.platforms.find((p) => p.x === platform.x && p.y === platform.y) === undefined) {
+        this.addPlatform(platform);
       }
     });
     if (this.star === undefined) {
@@ -104,7 +100,7 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  private addPlayer(id: string, x: number, y: number) {
+  private addPlayer({ id, x, y }: Player) {
     const sprite = new Phaser.GameObjects.Sprite(this, x, y, "player").setOrigin(0, 0);
     this.add.existing(sprite);
     this.players.set(id, sprite);
@@ -113,7 +109,15 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  private updatePlayer(id: string, x: number, y: number) {
+  private addPlatform({ x, y, width }: Platform) {
+    const sprite = new Phaser.GameObjects.TileSprite(this, x, y, width, PLATFORM_HEIGHT, "platform")
+      .setTileScale(0.25, 0.25)
+      .setOrigin(0, 0);
+    this.add.existing(sprite);
+    this.platforms.push({ x, y });
+  }
+
+  private updatePlayer({ id, x, y }: Player) {
     const sprite = this.players.get(id)!;
 
     if (x < sprite.x) {

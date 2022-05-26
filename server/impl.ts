@@ -88,9 +88,11 @@ export class Impl implements Methods<InternalState> {
     if (player.body.y < BORDER_RADIUS || player.body.y > MAP_HEIGHT - BORDER_RADIUS) {
       return Response.error("Too close to border");
     }
+
     const platform = makePlatform(state.physics, player.body.x, player.body.y, PLAYER_WIDTH);
     state.platforms.push(platform);
     state.players.forEach((p) => state.physics.add.collider(p.body, platform));
+
     player.body.moves = false;
     player.freezeTimer = 5;
     return Response.ok();
@@ -104,18 +106,7 @@ export class Impl implements Methods<InternalState> {
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {
     state.players.forEach((player) => {
-      if (player.inputs.horizontal === XDirection.LEFT && !player.body.blocked.left) {
-        player.body.setVelocityX(-200);
-      } else if (player.inputs.horizontal === XDirection.RIGHT && !player.body.blocked.right) {
-        player.body.setVelocityX(200);
-      } else if (player.inputs.horizontal === XDirection.NONE) {
-        player.body.setVelocityX(0);
-      }
-      if (player.inputs.vertical === YDirection.UP && player.body.blocked.down) {
-        player.body.setVelocityY(-200);
-      } else if (player.inputs.vertical === YDirection.DOWN && !player.body.blocked.down) {
-        player.body.setVelocityY(150);
-      }
+      updatePlayerVelocity(player.body, player.inputs);
 
       if (player.freezeTimer > 0) {
         player.freezeTimer -= timeDelta;
@@ -126,11 +117,9 @@ export class Impl implements Methods<InternalState> {
       }
     });
 
-    if (state.players.every(({ body }) => body.velocity.x === 0 && body.velocity.y === 0 && body.blocked.down)) {
-      return;
+    if (!state.players.every(({ body }) => body.velocity.x === 0 && body.velocity.y === 0 && body.blocked.down)) {
+      state.physics.world.update(ctx.time, timeDelta * 1000);
     }
-
-    state.physics.world.update(ctx.time, timeDelta * 1000);
   }
 }
 
@@ -139,4 +128,19 @@ function makePlatform(physics: ArcadePhysics, x: number, y: number, width: numbe
   platform.allowGravity = false;
   platform.pushable = false;
   return platform;
+}
+
+function updatePlayerVelocity(body: Body, inputs: Inputs) {
+  if (inputs.horizontal === XDirection.LEFT && !body.blocked.left) {
+    body.setVelocityX(-200);
+  } else if (inputs.horizontal === XDirection.RIGHT && !body.blocked.right) {
+    body.setVelocityX(200);
+  } else if (inputs.horizontal === XDirection.NONE) {
+    body.setVelocityX(0);
+  }
+  if (inputs.vertical === YDirection.UP && body.blocked.down) {
+    body.setVelocityY(-200);
+  } else if (inputs.vertical === YDirection.DOWN && !body.blocked.down) {
+    body.setVelocityY(150);
+  }
 }
