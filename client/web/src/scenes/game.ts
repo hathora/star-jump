@@ -27,6 +27,7 @@ export class GameScene extends Phaser.Scene {
     this.load.image("star", "/star.png");
     this.load.image("background", "/background.png");
     this.load.audio("jump", "/jump.mp3");
+    this.load.audio("music", "/music.ogg");
   }
 
   init({
@@ -68,6 +69,7 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT);
     this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
 
+    this.sound.play("music", { loop: true });
     this.jumpSound = this.sound.add("jump");
 
     this.anims.create({
