@@ -37,4 +37,4 @@ auth:
 
 userState: PlayerState
 error: string
-tick: 50
+tick: 25
