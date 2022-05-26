@@ -12,6 +12,8 @@ export class GameScene extends Phaser.Scene {
   private platforms: { x: number; y: number }[] = [];
   private star: Star | undefined;
 
+  private idleCount = 0;
+
   constructor() {
     super("game");
   }
@@ -113,25 +115,32 @@ export class GameScene extends Phaser.Scene {
 
   private updatePlayer(id: string, x: number, y: number) {
     const sprite = this.players.get(id)!;
+
     if (x < sprite.x) {
       sprite.setFlipX(true);
     } else if (x > sprite.x) {
       sprite.setFlipX(false);
     }
 
+    let idle = false;
     if (y < sprite.y) {
-      console.log("play jump");
       sprite.anims.play("jump", true);
     } else if (y > sprite.y) {
-      console.log("play fall");
       sprite.anims.play("fall", true);
-    } else if (x === sprite.x) {
-      console.log("play idle");
-      sprite.anims.play("idle", true);
-    } else {
-      console.log("play walk");
+    } else if (x !== sprite.x) {
       sprite.anims.play("walk", true);
+    } else {
+      idle = true;
+      if (this.idleCount > 2) {
+        sprite.anims.play("idle", true);
+      }
     }
+    if (idle) {
+      this.idleCount++;
+    } else {
+      this.idleCount = 0;
+    }
+
     sprite.x = x;
     sprite.y = y;
   }
