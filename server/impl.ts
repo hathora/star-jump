@@ -33,7 +33,7 @@ export class Impl implements Methods<InternalState> {
     const config = {
       sys: {
         game: { config: {} },
-        settings: { physics: { gravity: { y: 300 } } },
+        settings: { physics: { gravity: { y: 200 } } },
         scale: { width: MAP_WIDTH, height: MAP_HEIGHT },
       },
     };
@@ -105,16 +105,16 @@ export class Impl implements Methods<InternalState> {
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {
     state.players.forEach((player) => {
       if (player.inputs.horizontal === XDirection.LEFT && !player.body.blocked.left) {
-        player.body.setVelocityX(-300);
+        player.body.setVelocityX(-200);
       } else if (player.inputs.horizontal === XDirection.RIGHT && !player.body.blocked.right) {
-        player.body.setVelocityX(300);
+        player.body.setVelocityX(200);
       } else if (player.inputs.horizontal === XDirection.NONE) {
         player.body.setVelocityX(0);
       }
       if (player.inputs.vertical === YDirection.UP && player.body.blocked.down) {
-        player.body.setVelocityY(-300);
+        player.body.setVelocityY(-200);
       } else if (player.inputs.vertical === YDirection.DOWN && !player.body.blocked.down) {
-        player.body.setVelocityY(300);
+        player.body.setVelocityY(150);
       }
 
       if (player.freezeTimer > 0) {

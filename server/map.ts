@@ -1,6 +1,6 @@
 type Platform = { x: number; y: number; width: number };
 
-export const BORDER_RADIUS = 100;
+export const BORDER_RADIUS = 64;
 export const PLATFORM_WIDTHS = [64, 160, 320];
 
 export function generatePlatforms(mapWidth: number, mapHeight: number, chance: Chance.Chance): Platform[] {

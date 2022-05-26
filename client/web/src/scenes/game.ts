@@ -17,7 +17,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.spritesheet("player", "/dude.png", { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet("player", "/player.png", { frameWidth: 32, frameHeight: 32 });
     this.load.image("platform", "/brick.png");
     this.load.image("star", "/star.png");
     this.load.image("background", "/background.png");
@@ -60,18 +60,22 @@ export class GameScene extends Phaser.Scene {
     this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
 
     this.anims.create({
-      key: "left",
-      frames: this.anims.generateFrameNumbers("player", { start: 0, end: 3 }),
-      frameRate: 10,
-    });
-    this.anims.create({
       key: "idle",
-      frames: [{ key: "player", frame: 4 }],
+      frames: this.anims.generateFrameNumbers("player", { start: 0, end: 10 }),
+      frameRate: 10,
     });
     this.anims.create({
-      key: "right",
-      frames: this.anims.generateFrameNumbers("player", { start: 5, end: 8 }),
+      key: "walk",
+      frames: this.anims.generateFrameNumbers("player", { start: 11, end: 22 }),
       frameRate: 10,
+    });
+    this.anims.create({
+      key: "jump",
+      frames: [{ key: "player", frame: 23 }],
+    });
+    this.anims.create({
+      key: "fall",
+      frames: [{ key: "player", frame: 24 }],
     });
   }
 
@@ -110,11 +114,23 @@ export class GameScene extends Phaser.Scene {
   private updatePlayer(id: string, x: number, y: number) {
     const sprite = this.players.get(id)!;
     if (x < sprite.x) {
-      sprite.anims.play("left", true);
+      sprite.setFlipX(true);
     } else if (x > sprite.x) {
-      sprite.anims.play("right", true);
-    } else {
+      sprite.setFlipX(false);
+    }
+
+    if (y < sprite.y) {
+      console.log("play jump");
+      sprite.anims.play("jump", true);
+    } else if (y > sprite.y) {
+      console.log("play fall");
+      sprite.anims.play("fall", true);
+    } else if (x === sprite.x) {
+      console.log("play idle");
       sprite.anims.play("idle", true);
+    } else {
+      console.log("play walk");
+      sprite.anims.play("walk", true);
     }
     sprite.x = x;
     sprite.y = y;
