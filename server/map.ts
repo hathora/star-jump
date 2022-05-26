@@ -1,7 +1,7 @@
 type Platform = { x: number; y: number; width: number };
 
 export const BORDER_RADIUS = 100;
-export const PLATFORM_WIDTHS = [50, 150, 300];
+export const PLATFORM_WIDTHS = [64, 160, 320];
 
 export function generatePlatforms(mapWidth: number, mapHeight: number, chance: Chance.Chance): Platform[] {
   const numPlatforms = Math.round((mapWidth * mapHeight) / 100000);
