@@ -6,11 +6,14 @@ import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/const
 
 export class GameScene extends Phaser.Scene {
   private user!: UserData;
-  private buffer!: InterpolationBuffer<PlayerState>;
+  private stateBuffer!: InterpolationBuffer<PlayerState>;
+  private eventsBuffer!: string[];
 
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
   private platforms: { x: number; y: number }[] = [];
   private star: Star | undefined;
+
+  private jumpSound: Phaser.Sound.BaseSound;
 
   private idleCount = 0;
 
@@ -23,19 +26,23 @@ export class GameScene extends Phaser.Scene {
     this.load.image("platform", "/brick.png");
     this.load.image("star", "/star.png");
     this.load.image("background", "/background.png");
+    this.load.audio("jump", "/jump.wav");
   }
 
   init({
     user,
-    buffer,
+    stateBuffer,
+    eventsBuffer,
     connection,
   }: {
     user: UserData;
-    buffer: InterpolationBuffer<PlayerState>;
+    stateBuffer: InterpolationBuffer<PlayerState>;
+    eventsBuffer: string[];
     connection: HathoraConnection;
   }) {
     this.user = user;
-    this.buffer = buffer;
+    this.stateBuffer = stateBuffer;
+    this.eventsBuffer = eventsBuffer;
 
     connection.joinGame({});
 
@@ -61,6 +68,8 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT);
     this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
 
+    this.jumpSound = this.sound.add("jump");
+
     this.anims.create({
       key: "idle",
       frames: this.anims.generateFrameNumbers("player", { start: 0, end: 10 }),
@@ -81,7 +90,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   update() {
-    const state = this.buffer.getInterpolatedState(Date.now());
+    const state = this.stateBuffer.getInterpolatedState(Date.now());
     state.players.forEach((player) => {
       if (!this.players.has(player.id)) {
         this.addPlayer(player);
@@ -98,6 +107,15 @@ export class GameScene extends Phaser.Scene {
       this.star = state.star;
       this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
     }
+
+    this.eventsBuffer.forEach((event) => {
+      if (event === "jump") {
+        this.jumpSound.play();
+      } else {
+        console.error("Unkown event: ", event);
+      }
+    });
+    this.eventsBuffer.splice(0, this.eventsBuffer.length);
   }
 
   private addPlayer({ id, x, y }: Player) {

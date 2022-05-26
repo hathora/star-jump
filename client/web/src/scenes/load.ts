@@ -22,13 +22,15 @@ export class LoadScene extends Phaser.Scene {
 
 function start(client: HathoraClient, token: string, scenePlugin: Phaser.Scenes.ScenePlugin) {
   let connection: HathoraConnection;
-  let buffer: InterpolationBuffer<PlayerState>;
-  getConnection(client, token, ({ state, updatedAt }) => {
-    if (buffer === undefined) {
-      buffer = new InterpolationBuffer<PlayerState>(state, 25, lerp);
-      scenePlugin.start("help", { connection, buffer, user: HathoraClient.getUserFromToken(token) });
+  let stateBuffer: InterpolationBuffer<PlayerState>;
+  const eventsBuffer: string[] = [];
+  getConnection(client, token, ({ state, updatedAt, events }) => {
+    eventsBuffer.push(...events);
+    if (stateBuffer === undefined) {
+      stateBuffer = new InterpolationBuffer<PlayerState>(state, 25, lerp);
+      scenePlugin.start("help", { user: HathoraClient.getUserFromToken(token), stateBuffer, eventsBuffer, connection });
     } else {
-      buffer.enqueue(state, updatedAt);
+      stateBuffer.enqueue(state, updatedAt);
     }
   }).then((conn) => (connection = conn));
 }

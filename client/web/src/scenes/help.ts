@@ -1,7 +1,3 @@
-import { InterpolationBuffer } from "interpolation-buffer";
-import { UserData } from "../../../../api/base";
-import { PlayerState } from "../../../../api/types";
-import { HathoraConnection } from "../../../.hathora/client";
 import { VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from "../utils";
 
 export class HelpScene extends Phaser.Scene {
@@ -9,18 +5,8 @@ export class HelpScene extends Phaser.Scene {
     super("help");
   }
 
-  init({
-    user,
-    buffer,
-    connection,
-  }: {
-    user: UserData;
-    buffer: InterpolationBuffer<PlayerState>;
-    connection: HathoraConnection;
-  }) {
-    this.input.keyboard.on("keydown-ENTER", () => {
-      this.scene.start("game", { connection, buffer, user });
-    });
+  init(args: any) {
+    this.input.keyboard.on("keydown-ENTER", () => this.scene.start("game", args));
   }
 
   create() {
