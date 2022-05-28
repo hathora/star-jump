@@ -16,6 +16,8 @@ export class GameScene extends Phaser.Scene {
 
   private jumpSound!: Phaser.Sound.BaseSound;
 
+  private fadeOutRectangle: Phaser.GameObjects.Graphics | undefined;
+  private respawnText: Phaser.GameObjects.Text | undefined;
   private idleCount = 0;
 
   constructor() {
@@ -61,26 +63,7 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    this.input.keyboard.on("keydown-SPACE", async () => {
-      const res = await connection.freeze({});
-      if (res.type === "ok") {
-        const respawnText = this.add
-          .text(
-            this.cameras.main.midPoint.x,
-            this.cameras.main.midPoint.y - VIEWPORT_HEIGHT / 4,
-            "You died for the cause! Respwaning in 5s...",
-            { fontSize: "50px", fontStyle: "bold", color: "black" }
-          )
-          .setOrigin(0.5);
-        this.cameras.main.fadeOut(5000, 0, 0, 0, (cam: Phaser.Cameras.Scene2D.Camera, progress: number) => {
-          respawnText.setText(`You died for the cause!\nRespwaning in ${(5 - 5 * progress).toFixed(1)}s...`);
-          if (progress === 1) {
-            cam.fadeIn(0);
-            respawnText.destroy();
-          }
-        });
-      }
-    });
+    this.input.keyboard.on("keydown-SPACE", () => connection.freeze({}));
     this.input.keyboard.on("keydown", handleKeyEvt);
     this.input.keyboard.on("keyup", handleKeyEvt);
   }
@@ -132,6 +115,27 @@ export class GameScene extends Phaser.Scene {
     this.eventsBuffer.forEach((event) => {
       if (event === "jump") {
         this.jumpSound.play();
+      } else if (event === "frozen") {
+        this.fadeOutRectangle = this.add
+          .graphics({ fillStyle: { color: 0x000000 } })
+          .setAlpha(0)
+          .fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
+        this.respawnText = this.add
+          .text(
+            this.cameras.main.midPoint.x,
+            this.cameras.main.midPoint.y - VIEWPORT_HEIGHT / 4,
+            "You died for the cause!\nRespwaning in 5s...",
+            { fontSize: "50px", fontStyle: "bold", color: "black" }
+          )
+          .setOrigin(0.5);
+        this.tweens.add({
+          targets: this.fadeOutRectangle,
+          alpha: 1,
+          duration: 5000,
+        });
+      } else if (event === "respawn") {
+        this.fadeOutRectangle?.destroy();
+        this.respawnText?.destroy();
       } else {
         console.error("Unkown event: ", event);
       }

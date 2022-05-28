@@ -95,6 +95,7 @@ export class Impl implements Methods<InternalState> {
 
     player.body.moves = false;
     player.freezeTimer = 5;
+    ctx.sendEvent("frozen", userId);
     return Response.ok();
   }
   getUserState(state: InternalState, userId: UserId): PlayerState {
@@ -127,6 +128,7 @@ export class Impl implements Methods<InternalState> {
           player.body.moves = true;
           player.body.x = ctx.chance.natural({ max: MAP_WIDTH });
           player.body.y = MAP_HEIGHT - BORDER_RADIUS;
+          ctx.sendEvent("respawn", player.id);
         }
       }
     });
