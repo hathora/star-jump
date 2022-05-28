@@ -11,7 +11,8 @@ export function generatePlatforms(mapWidth: number, mapHeight: number, chance: C
   for (let i = 0; i < numPlatforms; i++) {
     const x = chance.natural({ max: mapWidth });
     const y =
-      (chance.natural({ min: BORDER_RADIUS, max: mapHeight - BORDER_RADIUS }) / PLATFORM_HEIGHT) * PLATFORM_HEIGHT;
+      Math.floor(chance.natural({ min: BORDER_RADIUS, max: mapHeight - BORDER_RADIUS }) / PLATFORM_HEIGHT) *
+      PLATFORM_HEIGHT;
     const width = chance.pickone(PLATFORM_WIDTHS);
     platforms.push({ x, y, width });
   }

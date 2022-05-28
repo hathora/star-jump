@@ -125,6 +125,8 @@ export class Impl implements Methods<InternalState> {
         if (player.freezeTimer < 0) {
           player.freezeTimer = 0;
           player.body.moves = true;
+          player.body.x = ctx.chance.natural({ max: MAP_WIDTH });
+          player.body.y = MAP_HEIGHT - BORDER_RADIUS;
         }
       }
     });

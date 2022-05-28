@@ -3,6 +3,7 @@ import { UserData } from "../../../../api/base";
 import { Inputs, Platform, Player, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
 import { HathoraConnection } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
+import { VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from "../utils";
 
 export class GameScene extends Phaser.Scene {
   private user!: UserData;
@@ -60,7 +61,26 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    this.input.keyboard.on("keydown-SPACE", () => connection.freeze({}));
+    this.input.keyboard.on("keydown-SPACE", async () => {
+      const res = await connection.freeze({});
+      if (res.type === "ok") {
+        const respawnText = this.add
+          .text(
+            this.cameras.main.midPoint.x,
+            this.cameras.main.midPoint.y - VIEWPORT_HEIGHT / 4,
+            "You died for the cause! Respwaning in 5s...",
+            { fontSize: "50px", fontStyle: "bold", color: "black" }
+          )
+          .setOrigin(0.5);
+        this.cameras.main.fadeOut(5000, 0, 0, 0, (cam: Phaser.Cameras.Scene2D.Camera, progress: number) => {
+          respawnText.setText(`You died for the cause!\nRespwaning in ${(5 - 5 * progress).toFixed(1)}s...`);
+          if (progress === 1) {
+            cam.fadeIn(0);
+            respawnText.destroy();
+          }
+        });
+      }
+    });
     this.input.keyboard.on("keydown", handleKeyEvt);
     this.input.keyboard.on("keyup", handleKeyEvt);
   }
@@ -109,7 +129,6 @@ export class GameScene extends Phaser.Scene {
       this.star = state.star;
       this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
     }
-
     this.eventsBuffer.forEach((event) => {
       if (event === "jump") {
         this.jumpSound.play();
