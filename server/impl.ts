@@ -26,6 +26,8 @@ type InternalState = {
   platforms: Body[];
   players: InternalPlayer[];
   star: Star;
+  startTime: number;
+  finishTime?: number;
 };
 
 export class Impl implements Methods<InternalState> {
@@ -44,6 +46,7 @@ export class Impl implements Methods<InternalState> {
       platforms: platforms.map(({ x, y, width }) => makePlatform(physics, x, y, width)),
       players: [],
       star: { x: ctx.chance.natural({ max: MAP_WIDTH }), y: 0 },
+      startTime: ctx.time,
     };
   }
   joinGame(state: InternalState, userId: string, ctx: Context): Response {
@@ -103,6 +106,8 @@ export class Impl implements Methods<InternalState> {
       players: state.players.map(({ id, body }) => ({ id, x: body.x, y: body.y })),
       platforms: state.platforms.map(({ x, y, width }) => ({ x, y, width })),
       star: state.star,
+      startTime: state.startTime,
+      finishTime: state.finishTime,
     };
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {

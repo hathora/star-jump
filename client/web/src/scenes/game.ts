@@ -3,7 +3,7 @@ import { UserData } from "../../../../api/base";
 import { Inputs, Platform, Player, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
 import { HathoraConnection } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
-import { VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from "../utils";
+import { formatTime, VIEWPORT_HEIGHT } from "../utils";
 
 export class GameScene extends Phaser.Scene {
   private user!: UserData;
@@ -16,6 +16,7 @@ export class GameScene extends Phaser.Scene {
 
   private jumpSound!: Phaser.Sound.BaseSound;
 
+  private timeElapsedText!: Phaser.GameObjects.Text;
   private fadeOutRectangle: Phaser.GameObjects.Graphics | undefined;
   private respawnText: Phaser.GameObjects.Text | undefined;
   private idleCount = 0;
@@ -71,6 +72,7 @@ export class GameScene extends Phaser.Scene {
   create() {
     this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT);
     this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
+    this.timeElapsedText = this.add.text(0, 0, "", { color: "black" }).setScrollFactor(0);
 
     this.sound.play("music", { loop: true });
     this.jumpSound = this.sound.add("jump");
@@ -112,6 +114,8 @@ export class GameScene extends Phaser.Scene {
       this.star = state.star;
       this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
     }
+    this.timeElapsedText.text = formatTime(Date.now() - state.startTime);
+
     this.eventsBuffer.forEach((event) => {
       if (event === "jump") {
         this.jumpSound.play();
