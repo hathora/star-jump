@@ -112,6 +112,7 @@ export class GameScene extends Phaser.Scene {
       border: 10,
       text: `Room Code: ${this.connection.stateId}`,
       color: "black",
+      fontFamily: "futura",
       readOnly: true,
     };
     const inputText = new InputText(this, VIEWPORT_WIDTH - 100, 20, 200, 50, config).setScrollFactor(0);
@@ -120,7 +121,11 @@ export class GameScene extends Phaser.Scene {
     const state = this.stateBuffer.getInterpolatedState(Date.now());
     if (state.startTime === undefined) {
       this.startText = this.add
-        .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, "Click to start", { color: "black", fontSize: "30px" })
+        .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, "Click to start", {
+          color: "black",
+          fontSize: "30px",
+          fontFamily: "futura",
+        })
         .setOrigin(0.5)
         .setScrollFactor(0)
         .setInteractive()
@@ -163,7 +168,7 @@ export class GameScene extends Phaser.Scene {
             this.cameras.main.midPoint.x,
             this.cameras.main.midPoint.y - VIEWPORT_HEIGHT / 4,
             "You died for the cause!\nRespwaning in 5s...",
-            { fontSize: "50px", fontStyle: "bold", color: "black" }
+            { fontSize: "50px", fontStyle: "bold", color: "black", fontFamily: "futura" }
           )
           .setOrigin(0.5);
         this.tweens.add({
@@ -188,6 +193,7 @@ export class GameScene extends Phaser.Scene {
             {
               color: "white",
               fontSize: "30px",
+              fontFamily: "futura",
             }
           )
           .setScrollFactor(0)

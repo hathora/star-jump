@@ -1,8 +1,14 @@
+import { MAP_WIDTH, MAP_HEIGHT } from "../../../../shared/constants";
 import { VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from "../utils";
+import backgroundUrl from "../assets/background.png";
 
 export class HelpScene extends Phaser.Scene {
   constructor() {
     super("help");
+  }
+
+  preload() {
+    this.load.image("background", backgroundUrl);
   }
 
   init(args: any) {
@@ -11,6 +17,7 @@ export class HelpScene extends Phaser.Scene {
   }
 
   create() {
+    this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
     this.add
       .text(
         VIEWPORT_WIDTH / 2,
@@ -20,7 +27,7 @@ Press space to die and turn into a platform.
 Get to the top and collect the star.
 
 Click anywhere to start.`,
-        { fontSize: "30px" }
+        { fontSize: "30px", fontFamily: "futura" }
       )
       .setOrigin(0.5);
   }
