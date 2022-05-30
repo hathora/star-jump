@@ -124,7 +124,7 @@ export class Impl implements Methods<InternalState> {
 
     player.body.moves = false;
     player.freezeTimer = 5;
-    ctx.broadcastEvent("frozen");
+    ctx.sendEvent("frozen", userId);
     return Response.ok();
   }
   getUserState(state: InternalState, userId: UserId): PlayerState {
