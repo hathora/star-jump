@@ -136,29 +136,7 @@ export class GameScene extends Phaser.Scene {
 
   update() {
     const state = this.stateBuffer.getInterpolatedState(Date.now());
-    state.players.forEach((player) => {
-      if (!this.players.has(player.id)) {
-        this.addPlayer(player);
-      } else {
-        this.updatePlayer(player);
-      }
-    });
 
-    if (this.startText !== undefined) {
-      this.startText.text = `Click to start (${state.players.length} active players)`;
-    }
-    state.platforms.forEach((platform) => {
-      if (this.platforms.find((p) => p.x === platform.x && p.y === platform.y) === undefined) {
-        this.addPlatform(platform);
-      }
-    });
-    if (this.star === undefined) {
-      this.star = state.star;
-      this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
-    }
-    if (state.startTime !== undefined && state.finishTime === undefined) {
-      this.timeElapsedText.text = formatTime(Date.now() - state.startTime);
-    }
     this.eventsBuffer.forEach((event) => {
       if (event === "jump") {
         this.sound.play("jump", { volume: 2 });
@@ -215,6 +193,30 @@ export class GameScene extends Phaser.Scene {
       }
     });
     this.eventsBuffer.splice(0, this.eventsBuffer.length);
+
+    state.players.forEach((player) => {
+      if (!this.players.has(player.id)) {
+        this.addPlayer(player);
+      } else {
+        this.updatePlayer(player);
+      }
+    });
+
+    if (this.startText !== undefined) {
+      this.startText.text = `Click to start (${state.players.length} active players)`;
+    }
+    state.platforms.forEach((platform) => {
+      if (this.platforms.find((p) => p.x === platform.x && p.y === platform.y) === undefined) {
+        this.addPlatform(platform);
+      }
+    });
+    if (this.star === undefined) {
+      this.star = state.star;
+      this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
+    }
+    if (state.startTime !== undefined && state.finishTime === undefined) {
+      this.timeElapsedText.text = formatTime(Date.now() - state.startTime);
+    }
   }
 
   private addPlayer({ id, x, y }: Player) {
