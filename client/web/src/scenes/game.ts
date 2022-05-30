@@ -157,6 +157,8 @@ export class GameScene extends Phaser.Scene {
     this.players.set(id, sprite);
     if (id === this.user.id) {
       this.cameras.main.startFollow(sprite);
+    } else {
+      sprite.setTint(0x000fff);
     }
   }
 
