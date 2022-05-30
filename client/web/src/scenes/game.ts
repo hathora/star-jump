@@ -40,7 +40,7 @@ export class GameScene extends Phaser.Scene {
     this.load.spritesheet("player", playerUrl, { frameWidth: 32, frameHeight: 32 });
     this.load.image("platform", platformUrl);
     this.load.image("star", starUrl);
-    this.load.image("background", backgroundUrl);
+    this.load.image("gameBackground", backgroundUrl);
     this.load.audio("jump", jumpUrl);
     this.load.audio("music", musicUrl);
     this.load.audio("win", winUrl);
@@ -85,7 +85,7 @@ export class GameScene extends Phaser.Scene {
 
   create() {
     this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT);
-    this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
+    this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "gameBackground").setOrigin(0, 0);
     this.timeElapsedText = this.add.text(0, 0, "", { color: "black", fontFamily: "futura" }).setScrollFactor(0);
     this.timeElapsedText.depth = 100;
 

@@ -1,6 +1,6 @@
 import { MAP_WIDTH, MAP_HEIGHT } from "../../../../shared/constants";
 import { VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from "../utils";
-import backgroundUrl from "../assets/background.png";
+import backgroundUrl from "../assets/lobby.png";
 
 export class HelpScene extends Phaser.Scene {
   constructor() {
@@ -17,7 +17,7 @@ export class HelpScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
+    this.add.sprite(0, 0, "background").setOrigin(0, 0);
     this.add
       .text(
         VIEWPORT_WIDTH / 2,

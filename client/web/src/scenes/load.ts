@@ -3,7 +3,7 @@ import { Player, PlayerState } from "../../../../api/types";
 import { MAP_WIDTH, MAP_HEIGHT } from "../../../../shared/constants";
 import { HathoraClient, StateId } from "../../../.hathora/client";
 import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from "../utils";
-import backgroundUrl from "../assets/background.png";
+import backgroundUrl from "../assets/lobby.png";
 
 export class LoadScene extends Phaser.Scene {
   private client!: HathoraClient;
@@ -25,7 +25,7 @@ export class LoadScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
+    this.add.sprite(0, 0, "background").setOrigin(0, 0);
     this.add
       .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, "Loading...", {
         fontSize: "50px",
