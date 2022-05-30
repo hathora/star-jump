@@ -18,6 +18,7 @@ types:
     x: int
     y: int
     width: int
+    createdBy: string?
   Star:
     x: int
     y: int

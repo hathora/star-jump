@@ -11,7 +11,7 @@ export class GameScene extends Phaser.Scene {
   private eventsBuffer!: string[];
 
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
-  private platforms: { x: number; y: number }[] = [];
+  private platforms: { x: number; y: number; createdBy?: string }[] = [];
   private star: Star | undefined;
 
   private jumpSound!: Phaser.Sound.BaseSound;
@@ -158,14 +158,19 @@ export class GameScene extends Phaser.Scene {
     if (id === this.user.id) {
       this.cameras.main.startFollow(sprite);
     } else {
-      sprite.setTint(0x000fff);
+      sprite.setTint(0xcccccc);
     }
   }
 
-  private addPlatform({ x, y, width }: Platform) {
+  private addPlatform({ x, y, width, createdBy }: Platform) {
     const sprite = new Phaser.GameObjects.TileSprite(this, x, y, width, PLATFORM_HEIGHT, "platform")
       .setTileScale(0.25, 0.25)
       .setOrigin(0, 0);
+
+    if (createdBy !== this.user.id) {
+      sprite.setTint(0xcccccc);
+    }
+
     this.add.existing(sprite);
     this.platforms.push({ x, y });
   }
