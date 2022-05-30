@@ -108,9 +108,7 @@ export class GameScene extends Phaser.Scene {
       .text(450, 0, `Room Code: ${this.stateId} (click to copy)`, { color: "black" })
       .setScrollFactor(0)
       .setInteractive()
-      .on("pointerdown", () => {
-        navigator.clipboard.writeText(this.stateId);
-      });
+      .on("pointerdown", () => navigator.clipboard.writeText(this.stateId));
   }
 
   update() {
