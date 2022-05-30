@@ -122,7 +122,7 @@ export class GameScene extends Phaser.Scene {
     const state = this.stateBuffer.getInterpolatedState(Date.now());
     if (state.startTime === undefined) {
       this.startText = this.add
-        .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, "Click to start", {
+        .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, `Click to start (${state.players.length} active players)`, {
           color: "black",
           fontSize: "30px",
           fontFamily: "futura",
@@ -143,6 +143,10 @@ export class GameScene extends Phaser.Scene {
         this.updatePlayer(player);
       }
     });
+
+    if (this.startText !== undefined) {
+      this.startText.text = `Click to start (${state.players.length} active players)`;
+    }
     state.platforms.forEach((platform) => {
       if (this.platforms.find((p) => p.x === platform.x && p.y === platform.y) === undefined) {
         this.addPlatform(platform);
@@ -183,6 +187,7 @@ export class GameScene extends Phaser.Scene {
       } else if (event === "start") {
         this.platforms.forEach((platform) => platform.destroy());
         this.startText?.destroy();
+        this.startText = undefined;
         this.gameoverText?.destroy();
         this.gameoverText = undefined;
       } else if (event === "finish") {
