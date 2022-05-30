@@ -181,6 +181,7 @@ export class GameScene extends Phaser.Scene {
         this.fadeOutRectangle?.destroy();
         this.respawnText?.destroy();
       } else if (event === "start") {
+        this.platforms.forEach((platform) => platform.destroy());
         this.startText?.destroy();
         this.gameoverText?.destroy();
         this.gameoverText = undefined;
@@ -201,7 +202,6 @@ export class GameScene extends Phaser.Scene {
           .setOrigin(0.5)
           .setInteractive()
           .on("pointerdown", async () => {
-            this.platforms.forEach((platform) => platform.destroy());
             await this.connection.startGame({});
           });
         this.timeElapsedText;
