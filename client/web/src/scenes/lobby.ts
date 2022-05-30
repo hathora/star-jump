@@ -15,10 +15,15 @@ export class LobbyScene extends Phaser.Scene {
       .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 8, "Welcome to Star Jump!", {
         fontSize: "40px",
         fontFamily: "futura",
+        color: "black",
       })
       .setOrigin(0.5);
     const createButton = this.add
-      .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 3, "Create New Game", { fontSize: "20px", fontFamily: "futura" })
+      .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 3, "Create New Game", {
+        fontSize: "20px",
+        fontFamily: "futura",
+        color: "black",
+      })
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
       .on("pointerdown", async () => {
@@ -37,6 +42,7 @@ export class LobbyScene extends Phaser.Scene {
       .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 3 + 150, "Join Existing Game", {
         fontSize: "20px",
         fontFamily: "futura",
+        color: "black",
       })
       .setInteractive({ useHandCursor: true })
       .setOrigin(0.5)

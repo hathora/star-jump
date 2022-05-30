@@ -27,7 +27,7 @@ Press space to die and turn into a platform.
 Get to the top and collect the star.
 
 Click anywhere to start.`,
-        { fontSize: "30px", fontFamily: "futura" }
+        { fontSize: "30px", fontFamily: "futura", color: "black" }
       )
       .setOrigin(0.5);
   }

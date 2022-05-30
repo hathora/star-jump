@@ -86,7 +86,8 @@ export class GameScene extends Phaser.Scene {
   create() {
     this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT);
     this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
-    this.timeElapsedText = this.add.text(0, 0, "", { color: "black" }).setScrollFactor(0);
+    this.timeElapsedText = this.add.text(0, 0, "", { color: "black", fontFamily: "futura" }).setScrollFactor(0);
+    this.timeElapsedText.depth = 100;
 
     this.sound.play("music", { loop: true, volume: 0.25 });
 
@@ -191,7 +192,7 @@ export class GameScene extends Phaser.Scene {
             VIEWPORT_HEIGHT / 2,
             `You won in ${formatTime(state.finishTime! - state.startTime!)}!`,
             {
-              color: "white",
+              color: "black",
               fontSize: "30px",
               fontFamily: "futura",
             }

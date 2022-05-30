@@ -27,7 +27,11 @@ export class LoadScene extends Phaser.Scene {
   create() {
     this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
     this.add
-      .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, "Loading...", { fontSize: "50px", fontFamily: "futura" })
+      .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, "Loading...", {
+        fontSize: "50px",
+        fontFamily: "futura",
+        color: "black",
+      })
       .setOrigin(0.5);
     let stateBuffer: InterpolationBuffer<PlayerState>;
     const eventsBuffer: string[] = [];
