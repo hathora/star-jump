@@ -25,7 +25,7 @@ types:
     players: Player[]
     platforms: Platform[]
     star: Star
-    startTime: int
+    startTime: int?
     finishTime: int?
 
 methods:
@@ -33,6 +33,7 @@ methods:
   setInputs:
     inputs: Inputs
   freeze:
+  startGame:
 
 auth:
   anonymous: {}

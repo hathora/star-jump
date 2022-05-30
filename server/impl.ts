@@ -10,6 +10,7 @@ import {
   XDirection,
   YDirection,
   Star,
+  IStartGameRequest,
 } from "../api/types";
 import { Methods, Context } from "./.hathora/methods";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT, PLAYER_HEIGHT, PLAYER_WIDTH } from "../shared/constants";
@@ -26,7 +27,7 @@ type InternalState = {
   platforms: Body[];
   players: InternalPlayer[];
   star: Body;
-  startTime: number;
+  startTime?: number;
   finishTime?: number;
 };
 
@@ -40,13 +41,11 @@ export class Impl implements Methods<InternalState> {
       },
     };
     const physics = new ArcadePhysics(config);
-    const platforms = generatePlatforms(MAP_WIDTH, MAP_HEIGHT, ctx.chance);
     return {
       physics,
-      platforms: platforms.map(({ x, y, width }) => makeStaticBody(physics, x, y, width, PLATFORM_HEIGHT)),
+      platforms: [],
       players: [],
       star: makeStaticBody(physics, ctx.chance.natural({ max: MAP_WIDTH }), 0, PLAYER_WIDTH, PLAYER_HEIGHT),
-      startTime: ctx.time,
     };
   }
   joinGame(state: InternalState, userId: string, ctx: Context): Response {
@@ -72,6 +71,19 @@ export class Impl implements Methods<InternalState> {
     });
     return Response.ok();
   }
+  startGame(state: InternalState, userId: string, ctx: Context, request: IStartGameRequest): Response {
+    if (state.startTime !== undefined) {
+      return Response.error("Game already started");
+    }
+    state.startTime = ctx.time;
+    const platforms = generatePlatforms(MAP_WIDTH, MAP_HEIGHT, ctx.chance);
+    state.platforms = platforms.map(({ x, y, width }) => {
+      const platformBody = makeStaticBody(state.physics, x, y, width, PLATFORM_HEIGHT);
+      state.players.forEach((player) => state.physics.add.collider(platformBody, player.body));
+      return platformBody;
+    });
+    return Response.ok();
+  }
   setInputs(state: InternalState, userId: UserId, ctx: Context, request: ISetInputsRequest): Response {
     const player = state.players.find((p) => p.id === userId);
     if (player === undefined) {
@@ -84,6 +96,9 @@ export class Impl implements Methods<InternalState> {
     const player = state.players.find((p) => p.id === userId);
     if (player === undefined) {
       return Response.error("Player not joined");
+    }
+    if (state.startTime === undefined) {
+      return Response.error("Game not started");
     }
     if (player.freezeTimer > 0) {
       return Response.error("Frozen");

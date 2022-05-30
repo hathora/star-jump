@@ -3,7 +3,7 @@ import { UserData } from "../../../../api/base";
 import { Inputs, Platform, Player, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
 import { HathoraConnection, StateId } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
-import { formatTime, VIEWPORT_HEIGHT } from "../utils";
+import { formatTime, VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from "../utils";
 
 import playerUrl from "../assets/player.png";
 import platformUrl from "../assets/brick.png";
@@ -16,7 +16,7 @@ export class GameScene extends Phaser.Scene {
   private user!: UserData;
   private stateBuffer!: InterpolationBuffer<PlayerState>;
   private eventsBuffer!: string[];
-  private stateId!: StateId;
+  private connection!: HathoraConnection;
 
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
   private platforms: { x: number; y: number }[] = [];
@@ -56,7 +56,7 @@ export class GameScene extends Phaser.Scene {
     this.user = user;
     this.stateBuffer = stateBuffer;
     this.eventsBuffer = eventsBuffer;
-    this.stateId = connection.stateId;
+    this.connection = connection;
 
     connection.joinGame({});
 
@@ -105,10 +105,20 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.add
-      .text(450, 0, `Room Code: ${this.stateId} (click to copy)`, { color: "black" })
+      .text(450, 0, `Room Code: ${this.connection.stateId} (click to copy)`, { color: "black" })
       .setScrollFactor(0)
       .setInteractive()
-      .on("pointerdown", () => navigator.clipboard.writeText(this.stateId));
+      .on("pointerdown", () => navigator.clipboard.writeText(this.connection.stateId));
+
+    const startText = this.add
+      .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, "Click to start", { color: "black", fontSize: "30px" })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setInteractive()
+      .on("pointerdown", async () => {
+        await this.connection.startGame({});
+        startText.destroy();
+      });
   }
 
   update() {
@@ -129,12 +139,13 @@ export class GameScene extends Phaser.Scene {
       this.star = state.star;
       this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
     }
-    if (state.finishTime === undefined) {
-      this.timeElapsedText.text = formatTime(Date.now() - state.startTime);
-    } else {
-      this.timeElapsedText.text = formatTime(state.finishTime - state.startTime);
+    if (state.startTime !== undefined) {
+      if (state.finishTime === undefined) {
+        this.timeElapsedText.text = formatTime(Date.now() - state.startTime);
+      } else {
+        this.timeElapsedText.text = formatTime(state.finishTime - state.startTime);
+      }
     }
-
     this.eventsBuffer.forEach((event) => {
       if (event === "jump") {
         this.jumpSound.play();
