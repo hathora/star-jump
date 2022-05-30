@@ -13,6 +13,7 @@ import jumpUrl from "../assets/jump.mp3";
 import musicUrl from "../assets/music.ogg";
 import winUrl from "../assets/win.mp3";
 import deathUrl from "../assets/death.mp3";
+import InputText from "phaser3-rex-plugins/plugins/inputtext";
 
 export class GameScene extends Phaser.Scene {
   private user!: UserData;
@@ -107,11 +108,14 @@ export class GameScene extends Phaser.Scene {
       frames: [{ key: "player", frame: 24 }],
     });
 
-    this.add
-      .text(450, 0, `Room Code: ${this.connection.stateId} (click to copy)`, { color: "black" })
-      .setScrollFactor(0)
-      .setInteractive()
-      .on("pointerdown", () => navigator.clipboard.writeText(this.connection.stateId));
+    const config: InputText.IConfig = {
+      border: 10,
+      text: `Room Code: ${this.connection.stateId}`,
+      color: "black",
+      readOnly: true,
+    };
+    const inputText = new InputText(this, VIEWPORT_WIDTH - 100, 20, 200, 50, config).setScrollFactor(0);
+    this.add.existing(inputText);
 
     const state = this.stateBuffer.getInterpolatedState(Date.now());
     if (state.startTime === undefined) {

@@ -7,6 +7,7 @@ export class HelpScene extends Phaser.Scene {
 
   init(args: any) {
     this.input.keyboard.on("keydown-ENTER", () => this.scene.start("game", args));
+    this.input.on("pointerdown", () => this.scene.start("game", args));
   }
 
   create() {
@@ -18,7 +19,7 @@ export class HelpScene extends Phaser.Scene {
 Press space to die and turn into a platform.
 Get to the top and collect the star.
 
-Press enter to start.`,
+Click anywhere to start.`,
         { fontSize: "30px" }
       )
       .setOrigin(0.5);

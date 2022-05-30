@@ -23,16 +23,10 @@ export class LobbyScene extends Phaser.Scene {
         this.scene.start("load", { client, token, stateId });
       });
 
-    const config: InputText.IConfig = {
-      border: 10,
-      placeholder: "Room ID",
-    };
-    const inputText = new InputText(this, VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 3 + 50, 200, 50, config);
-    this.add.existing(inputText);
-
     const joinButton = this.add
-      .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 3 + 50, "Join Existing Game", { fontSize: "20px" })
+      .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 3 + 150, "Join Existing Game", { fontSize: "20px" })
       .setInteractive({ useHandCursor: true })
+      .setOrigin(0.5)
       .on("pointerdown", async () => {
         const client = new HathoraClient();
         if (sessionStorage.getItem("token") === null) {
@@ -43,5 +37,14 @@ export class LobbyScene extends Phaser.Scene {
         const token = sessionStorage.getItem("token")!;
         this.scene.start("load", { client, token, stateId: inputText.text?.trim() });
       });
+    const config: InputText.IConfig = {
+      border: 10,
+      borderColor: "black",
+      backgroundColor: "white",
+      placeholder: "Room Code",
+      color: "black",
+    };
+    const inputText = new InputText(this, joinButton.x, joinButton.y - 30, 100, 30, config);
+    this.add.existing(inputText);
   }
 }
