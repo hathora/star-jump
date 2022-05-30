@@ -1,7 +1,7 @@
 import { InterpolationBuffer } from "interpolation-buffer";
 import { UserData } from "../../../../api/base";
 import { Inputs, Platform, Player, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
-import { HathoraConnection } from "../../../.hathora/client";
+import { HathoraConnection, StateId } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
 import { formatTime, VIEWPORT_HEIGHT } from "../utils";
 
@@ -16,6 +16,7 @@ export class GameScene extends Phaser.Scene {
   private user!: UserData;
   private stateBuffer!: InterpolationBuffer<PlayerState>;
   private eventsBuffer!: string[];
+  private stateId!: StateId;
 
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
   private platforms: { x: number; y: number }[] = [];
@@ -55,6 +56,7 @@ export class GameScene extends Phaser.Scene {
     this.user = user;
     this.stateBuffer = stateBuffer;
     this.eventsBuffer = eventsBuffer;
+    this.stateId = connection.stateId;
 
     connection.joinGame({});
 
@@ -101,6 +103,14 @@ export class GameScene extends Phaser.Scene {
       key: "fall",
       frames: [{ key: "player", frame: 24 }],
     });
+
+    this.add
+      .text(450, 0, `Room Code: ${this.stateId} (click to copy)`, { color: "black" })
+      .setScrollFactor(0)
+      .setInteractive()
+      .on("pointerdown", () => {
+        navigator.clipboard.writeText(this.stateId);
+      });
   }
 
   update() {

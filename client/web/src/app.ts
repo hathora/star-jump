@@ -11,4 +11,8 @@ new Phaser.Game({
   height: VIEWPORT_HEIGHT,
   backgroundColor: "#4488aa",
   scene: [LobbyScene, LoadScene, HelpScene, GameScene],
+  parent: "phaser-container",
+  dom: {
+    createContainer: true,
+  },
 });
