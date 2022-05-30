@@ -21,9 +21,13 @@ type InternalPlayer = {
   inputs: Inputs;
   freezeTimer: number;
 };
+type InternalPlatform = {
+  body: Body;
+  createdBy?: UserId;
+};
 type InternalState = {
   physics: ArcadePhysics;
-  platforms: Body[];
+  platforms: InternalPlatform[];
   players: InternalPlayer[];
   star: Body;
   startTime: number;
@@ -43,7 +47,9 @@ export class Impl implements Methods<InternalState> {
     const platforms = generatePlatforms(MAP_WIDTH, MAP_HEIGHT, ctx.chance);
     return {
       physics,
-      platforms: platforms.map(({ x, y, width }) => makeStaticBody(physics, x, y, width, PLATFORM_HEIGHT)),
+      platforms: platforms.map(({ x, y, width }) => {
+        return { body: makeStaticBody(physics, x, y, width, PLATFORM_HEIGHT) };
+      }),
       players: [],
       star: makeStaticBody(physics, ctx.chance.natural({ max: MAP_WIDTH }), 0, PLAYER_WIDTH, PLAYER_HEIGHT),
       startTime: ctx.time,
@@ -62,7 +68,7 @@ export class Impl implements Methods<InternalState> {
     playerBody.pushable = false;
     // @ts-ignore
     playerBody.setCollideWorldBounds(true);
-    state.platforms.forEach((platform) => state.physics.add.collider(playerBody, platform));
+    state.platforms.forEach((platform) => state.physics.add.collider(playerBody, platform.body));
     state.players.forEach((player) => state.physics.add.collider(playerBody, player.body));
     state.players.push({
       id: userId,
@@ -95,9 +101,9 @@ export class Impl implements Methods<InternalState> {
       return Response.error("Game is over");
     }
 
-    const platform = makeStaticBody(state.physics, player.body.x, player.body.y, PLAYER_WIDTH, PLATFORM_HEIGHT);
-    state.platforms.push(platform);
-    state.players.forEach((p) => state.physics.add.collider(p.body, platform));
+    const platformBody = makeStaticBody(state.physics, player.body.x, player.body.y, PLAYER_WIDTH, PLATFORM_HEIGHT);
+    state.platforms.push({ body: platformBody, createdBy: userId });
+    state.players.forEach((p) => state.physics.add.collider(p.body, platformBody));
 
     player.body.moves = false;
     player.freezeTimer = 5;
@@ -107,7 +113,12 @@ export class Impl implements Methods<InternalState> {
   getUserState(state: InternalState, userId: UserId): PlayerState {
     return {
       players: state.players.map(({ id, body }) => ({ id, x: body.x, y: body.y })),
-      platforms: state.platforms.map(({ x, y, width }) => ({ x, y, width })),
+      platforms: state.platforms.map((platform) => ({
+        x: platform.body.x,
+        y: platform.body.y,
+        width: platform.body.width,
+        createdBy: platform.createdBy,
+      })),
       star: { x: state.star.x, y: state.star.y },
       startTime: state.startTime,
       finishTime: state.finishTime,
