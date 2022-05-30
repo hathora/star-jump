@@ -25,9 +25,9 @@ export class LoadScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.sprite(0, 0, "background").setOrigin(0, 0);
+    this.add.sprite(0, 0, "background").setOrigin(0, 0).setDisplaySize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
     this.add
-      .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, "Loading...", {
+      .text(VIEWPORT_WIDTH / 2, (VIEWPORT_HEIGHT / 3) * 4, "Loading...", {
         fontSize: "50px",
         fontFamily: "futura",
         color: "black",

@@ -17,11 +17,11 @@ export class HelpScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.sprite(0, 0, "background").setOrigin(0, 0);
+    this.add.sprite(0, 0, "background").setOrigin(0, 0).setDisplaySize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
     this.add
       .text(
         VIEWPORT_WIDTH / 2,
-        VIEWPORT_HEIGHT / 2,
+        VIEWPORT_HEIGHT / 6,
         `Move around with the arrow keys.
 Press space to die and turn into a platform.
 Get to the top and collect the star.
