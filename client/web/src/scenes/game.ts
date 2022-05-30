@@ -3,6 +3,7 @@ import { UserData } from "../../../../api/base";
 import { Inputs, Platform, Player, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
 import { HathoraConnection } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
+import { formatTime, VIEWPORT_HEIGHT } from "../utils";
 
 import playerUrl from "../assets/player.png";
 import platformUrl from "../assets/brick.png";
@@ -22,6 +23,9 @@ export class GameScene extends Phaser.Scene {
 
   private jumpSound!: Phaser.Sound.BaseSound;
 
+  private timeElapsedText!: Phaser.GameObjects.Text;
+  private fadeOutRectangle: Phaser.GameObjects.Graphics | undefined;
+  private respawnText: Phaser.GameObjects.Text | undefined;
   private idleCount = 0;
 
   constructor() {
@@ -75,6 +79,7 @@ export class GameScene extends Phaser.Scene {
   create() {
     this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT);
     this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
+    this.timeElapsedText = this.add.text(0, 0, "", { color: "black" }).setScrollFactor(0);
 
     this.sound.play("music", { loop: true });
     this.jumpSound = this.sound.add("jump");
@@ -116,10 +121,36 @@ export class GameScene extends Phaser.Scene {
       this.star = state.star;
       this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
     }
+    if (state.finishTime === undefined) {
+      this.timeElapsedText.text = formatTime(Date.now() - state.startTime);
+    } else {
+      this.timeElapsedText.text = formatTime(state.finishTime - state.startTime);
+    }
 
     this.eventsBuffer.forEach((event) => {
       if (event === "jump") {
         this.jumpSound.play();
+      } else if (event === "frozen") {
+        this.fadeOutRectangle = this.add
+          .graphics({ fillStyle: { color: 0x000000 } })
+          .setAlpha(0)
+          .fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
+        this.respawnText = this.add
+          .text(
+            this.cameras.main.midPoint.x,
+            this.cameras.main.midPoint.y - VIEWPORT_HEIGHT / 4,
+            "You died for the cause!\nRespwaning in 5s...",
+            { fontSize: "50px", fontStyle: "bold", color: "black" }
+          )
+          .setOrigin(0.5);
+        this.tweens.add({
+          targets: this.fadeOutRectangle,
+          alpha: 1,
+          duration: 5000,
+        });
+      } else if (event === "respawn") {
+        this.fadeOutRectangle?.destroy();
+        this.respawnText?.destroy();
       } else {
         console.error("Unkown event: ", event);
       }

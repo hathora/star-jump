@@ -52,6 +52,8 @@ function lerp(from: PlayerState, to: PlayerState, pctElapsed: number): PlayerSta
     }),
     platforms: to.platforms,
     star: to.star,
+    startTime: to.startTime,
+    finishTime: to.finishTime,
   };
 }
 

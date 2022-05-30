@@ -25,6 +25,8 @@ types:
     players: Player[]
     platforms: Platform[]
     star: Star
+    startTime: int
+    finishTime: int?
 
 methods:
   joinGame:

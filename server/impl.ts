@@ -25,7 +25,9 @@ type InternalState = {
   physics: ArcadePhysics;
   platforms: Body[];
   players: InternalPlayer[];
-  star: Star;
+  star: Body;
+  startTime: number;
+  finishTime?: number;
 };
 
 export class Impl implements Methods<InternalState> {
@@ -41,9 +43,10 @@ export class Impl implements Methods<InternalState> {
     const platforms = generatePlatforms(MAP_WIDTH, MAP_HEIGHT, ctx.chance);
     return {
       physics,
-      platforms: platforms.map(({ x, y, width }) => makePlatform(physics, x, y, width)),
+      platforms: platforms.map(({ x, y, width }) => makeStaticBody(physics, x, y, width, PLATFORM_HEIGHT)),
       players: [],
-      star: { x: ctx.chance.natural({ max: MAP_WIDTH }), y: 0 },
+      star: makeStaticBody(physics, ctx.chance.natural({ max: MAP_WIDTH }), 0, PLAYER_WIDTH, PLAYER_HEIGHT),
+      startTime: ctx.time,
     };
   }
   joinGame(state: InternalState, userId: string, ctx: Context): Response {
@@ -88,20 +91,26 @@ export class Impl implements Methods<InternalState> {
     if (player.body.y < BORDER_RADIUS || player.body.y > MAP_HEIGHT - BORDER_RADIUS) {
       return Response.error("Too close to border");
     }
+    if (state.finishTime !== undefined) {
+      return Response.error("Game is over");
+    }
 
-    const platform = makePlatform(state.physics, player.body.x, player.body.y, PLAYER_WIDTH);
+    const platform = makeStaticBody(state.physics, player.body.x, player.body.y, PLAYER_WIDTH, PLATFORM_HEIGHT);
     state.platforms.push(platform);
     state.players.forEach((p) => state.physics.add.collider(p.body, platform));
 
     player.body.moves = false;
     player.freezeTimer = 5;
+    ctx.sendEvent("frozen", userId);
     return Response.ok();
   }
   getUserState(state: InternalState, userId: UserId): PlayerState {
     return {
       players: state.players.map(({ id, body }) => ({ id, x: body.x, y: body.y })),
       platforms: state.platforms.map(({ x, y, width }) => ({ x, y, width })),
-      star: state.star,
+      star: { x: state.star.x, y: state.star.y },
+      startTime: state.startTime,
+      finishTime: state.finishTime,
     };
   }
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {
@@ -125,6 +134,16 @@ export class Impl implements Methods<InternalState> {
         if (player.freezeTimer < 0) {
           player.freezeTimer = 0;
           player.body.moves = true;
+          player.body.x = ctx.chance.natural({ max: MAP_WIDTH });
+          player.body.y = MAP_HEIGHT - BORDER_RADIUS;
+          ctx.sendEvent("respawn", player.id);
+        }
+      }
+
+      if (state.finishTime === undefined) {
+        //@ts-ignore
+        if (state.physics.overlap(player.body, state.star)) {
+          state.finishTime = ctx.time;
         }
       }
     });
@@ -135,9 +154,9 @@ export class Impl implements Methods<InternalState> {
   }
 }
 
-function makePlatform(physics: ArcadePhysics, x: number, y: number, width: number) {
-  const platform = physics.add.body(Math.round(x), Math.round(y), width, PLATFORM_HEIGHT);
-  platform.allowGravity = false;
-  platform.pushable = false;
-  return platform;
+function makeStaticBody(physics: ArcadePhysics, x: number, y: number, width: number, height: number) {
+  const body = physics.add.body(Math.round(x), Math.round(y), width, height);
+  body.allowGravity = false;
+  body.pushable = false;
+  return body;
 }
