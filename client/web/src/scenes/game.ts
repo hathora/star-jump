@@ -11,6 +11,8 @@ import starUrl from "../assets/star.png";
 import backgroundUrl from "../assets/background.png";
 import jumpUrl from "../assets/jump.mp3";
 import musicUrl from "../assets/music.ogg";
+import winUrl from "../assets/win.mp3";
+import deathUrl from "../assets/death.mp3";
 
 export class GameScene extends Phaser.Scene {
   private user!: UserData;
@@ -21,8 +23,6 @@ export class GameScene extends Phaser.Scene {
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
   private platforms: Phaser.GameObjects.TileSprite[] = [];
   private star: Star | undefined;
-
-  private jumpSound!: Phaser.Sound.BaseSound;
 
   private timeElapsedText!: Phaser.GameObjects.Text;
   private gameoverText: Phaser.GameObjects.Text | undefined;
@@ -41,6 +41,8 @@ export class GameScene extends Phaser.Scene {
     this.load.image("background", backgroundUrl);
     this.load.audio("jump", jumpUrl);
     this.load.audio("music", musicUrl);
+    this.load.audio("win", winUrl);
+    this.load.audio("death", deathUrl);
   }
 
   init({
@@ -84,8 +86,7 @@ export class GameScene extends Phaser.Scene {
     this.add.tileSprite(0, 0, MAP_WIDTH, MAP_HEIGHT, "background").setOrigin(0, 0);
     this.timeElapsedText = this.add.text(0, 0, "", { color: "black" }).setScrollFactor(0);
 
-    this.sound.play("music", { loop: true });
-    this.jumpSound = this.sound.add("jump");
+    this.sound.play("music", { loop: true, volume: 0.25 });
 
     this.anims.create({
       key: "idle",
@@ -141,6 +142,7 @@ export class GameScene extends Phaser.Scene {
       this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
     }
     if (state.finishTime !== undefined && this.gameoverText === undefined) {
+      this.sound.play("win", { volume: 10 });
       this.gameoverText = this.add
         .text(
           VIEWPORT_WIDTH / 2,
@@ -166,8 +168,9 @@ export class GameScene extends Phaser.Scene {
     }
     this.eventsBuffer.forEach((event) => {
       if (event === "jump") {
-        this.jumpSound.play();
+        this.sound.play("jump", { volume: 2 });
       } else if (event === "frozen") {
+        this.sound.play("death");
         this.fadeOutRectangle = this.add
           .graphics({ fillStyle: { color: 0x000000 } })
           .setAlpha(0)
