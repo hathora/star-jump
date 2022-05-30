@@ -1,14 +1,22 @@
 import { InterpolationBuffer } from "interpolation-buffer";
 import { UserData } from "../../../../api/base";
 import { Inputs, Platform, Player, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
-import { HathoraConnection } from "../../../.hathora/client";
+import { HathoraConnection, StateId } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
 import { formatTime, VIEWPORT_HEIGHT } from "../utils";
+
+import playerUrl from "../assets/player.png";
+import platformUrl from "../assets/brick.png";
+import starUrl from "../assets/star.png";
+import backgroundUrl from "../assets/background.png";
+import jumpUrl from "../assets/jump.mp3";
+import musicUrl from "../assets/music.ogg";
 
 export class GameScene extends Phaser.Scene {
   private user!: UserData;
   private stateBuffer!: InterpolationBuffer<PlayerState>;
   private eventsBuffer!: string[];
+  private stateId!: StateId;
 
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
   private platforms: { x: number; y: number }[] = [];
@@ -26,12 +34,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.spritesheet("player", "/player.png", { frameWidth: 32, frameHeight: 32 });
-    this.load.image("platform", "/brick.png");
-    this.load.image("star", "/star.png");
-    this.load.image("background", "/background.png");
-    this.load.audio("jump", "/jump.mp3");
-    this.load.audio("music", "/music.ogg");
+    this.load.spritesheet("player", playerUrl, { frameWidth: 32, frameHeight: 32 });
+    this.load.image("platform", platformUrl);
+    this.load.image("star", starUrl);
+    this.load.image("background", backgroundUrl);
+    this.load.audio("jump", jumpUrl);
+    this.load.audio("music", musicUrl);
   }
 
   init({
@@ -48,6 +56,7 @@ export class GameScene extends Phaser.Scene {
     this.user = user;
     this.stateBuffer = stateBuffer;
     this.eventsBuffer = eventsBuffer;
+    this.stateId = connection.stateId;
 
     connection.joinGame({});
 
@@ -94,6 +103,12 @@ export class GameScene extends Phaser.Scene {
       key: "fall",
       frames: [{ key: "player", frame: 24 }],
     });
+
+    this.add
+      .text(450, 0, `Room Code: ${this.stateId} (click to copy)`, { color: "black" })
+      .setScrollFactor(0)
+      .setInteractive()
+      .on("pointerdown", () => navigator.clipboard.writeText(this.stateId));
   }
 
   update() {
