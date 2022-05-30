@@ -26,6 +26,7 @@ export class GameScene extends Phaser.Scene {
 
   private timeElapsedText!: Phaser.GameObjects.Text;
   private gameoverText: Phaser.GameObjects.Text | undefined;
+  private startText: Phaser.GameObjects.Text | undefined;
   private fadeOutRectangle: Phaser.GameObjects.Graphics | undefined;
   private respawnText: Phaser.GameObjects.Text | undefined;
   private idleCount = 0;
@@ -112,15 +113,15 @@ export class GameScene extends Phaser.Scene {
       .setInteractive()
       .on("pointerdown", () => navigator.clipboard.writeText(this.connection.stateId));
 
-    const startText = this.add
-      .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, "Click to start", { color: "black", fontSize: "30px" })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setInteractive()
-      .on("pointerdown", async () => {
-        await this.connection.startGame({});
-        startText.destroy();
-      });
+    const state = this.stateBuffer.getInterpolatedState(Date.now());
+    if (state.startTime === undefined) {
+      this.startText = this.add
+        .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, "Click to start", { color: "black", fontSize: "30px" })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setInteractive()
+        .on("pointerdown", () => this.connection.startGame({}));
+    }
   }
 
   update() {
@@ -141,29 +142,7 @@ export class GameScene extends Phaser.Scene {
       this.star = state.star;
       this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
     }
-    if (state.finishTime !== undefined && this.gameoverText === undefined) {
-      this.sound.play("win", { volume: 10 });
-      this.gameoverText = this.add
-        .text(
-          VIEWPORT_WIDTH / 2,
-          VIEWPORT_HEIGHT / 2,
-          `You won in ${formatTime(state.finishTime - state.startTime!)}!`,
-          {
-            color: "white",
-            fontSize: "30px",
-          }
-        )
-        .setScrollFactor(0)
-        .setOrigin(0.5)
-        .setInteractive()
-        .on("pointerdown", async () => {
-          this.platforms.forEach((platform) => platform.destroy());
-          await this.connection.startGame({});
-          this.gameoverText!.destroy();
-          this.gameoverText = undefined;
-        });
-      this.timeElapsedText;
-    } else if (state.startTime !== undefined) {
+    if (state.startTime !== undefined && state.finishTime === undefined) {
       this.timeElapsedText.text = formatTime(Date.now() - state.startTime);
     }
     this.eventsBuffer.forEach((event) => {
@@ -191,6 +170,30 @@ export class GameScene extends Phaser.Scene {
       } else if (event === "respawn") {
         this.fadeOutRectangle?.destroy();
         this.respawnText?.destroy();
+      } else if (event === "start") {
+        this.startText?.destroy();
+        this.gameoverText?.destroy();
+        this.gameoverText = undefined;
+      } else if (event === "finish") {
+        this.sound.play("win", { volume: 10 });
+        this.gameoverText = this.add
+          .text(
+            VIEWPORT_WIDTH / 2,
+            VIEWPORT_HEIGHT / 2,
+            `You won in ${formatTime(state.finishTime! - state.startTime!)}!`,
+            {
+              color: "white",
+              fontSize: "30px",
+            }
+          )
+          .setScrollFactor(0)
+          .setOrigin(0.5)
+          .setInteractive()
+          .on("pointerdown", async () => {
+            this.platforms.forEach((platform) => platform.destroy());
+            await this.connection.startGame({});
+          });
+        this.timeElapsedText;
       } else {
         console.error("Unkown event: ", event);
       }

@@ -75,6 +75,7 @@ export class Impl implements Methods<InternalState> {
     if (state.finishTime === undefined && state.startTime !== undefined) {
       return Response.error("Game already started");
     }
+    ctx.broadcastEvent("start");
     state.startTime = ctx.time;
     state.finishTime = undefined;
     state.platforms.forEach((platform) => platform.destroy());
@@ -123,7 +124,7 @@ export class Impl implements Methods<InternalState> {
 
     player.body.moves = false;
     player.freezeTimer = 5;
-    ctx.sendEvent("frozen", userId);
+    ctx.broadcastEvent("frozen");
     return Response.ok();
   }
   getUserState(state: InternalState, userId: UserId): PlayerState {
@@ -166,6 +167,7 @@ export class Impl implements Methods<InternalState> {
         //@ts-ignore
         if (state.physics.overlap(player.body, state.star)) {
           state.finishTime = ctx.time;
+          ctx.broadcastEvent("finish");
         }
       }
     });
