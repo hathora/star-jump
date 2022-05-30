@@ -1,6 +1,6 @@
 import { InterpolationBuffer } from "interpolation-buffer";
 import { Player, PlayerState } from "../../../../api/types";
-import { HathoraClient, HathoraConnection, StateId, UpdateArgs } from "../../../.hathora/client";
+import { HathoraClient, StateId } from "../../../.hathora/client";
 import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from "../utils";
 
 export class LoadScene extends Phaser.Scene {
