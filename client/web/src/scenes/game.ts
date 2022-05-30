@@ -114,7 +114,11 @@ export class GameScene extends Phaser.Scene {
       this.star = state.star;
       this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
     }
-    this.timeElapsedText.text = formatTime(Date.now() - state.startTime);
+    if (state.finishTime === undefined) {
+      this.timeElapsedText.text = formatTime(Date.now() - state.startTime);
+    } else {
+      this.timeElapsedText.text = formatTime(state.finishTime - state.startTime);
+    }
 
     this.eventsBuffer.forEach((event) => {
       if (event === "jump") {
