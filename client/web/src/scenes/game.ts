@@ -19,12 +19,13 @@ export class GameScene extends Phaser.Scene {
   private connection!: HathoraConnection;
 
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
-  private platforms: { x: number; y: number }[] = [];
+  private platforms: Phaser.GameObjects.TileSprite[] = [];
   private star: Star | undefined;
 
   private jumpSound!: Phaser.Sound.BaseSound;
 
   private timeElapsedText!: Phaser.GameObjects.Text;
+  private gameoverText: Phaser.GameObjects.Text | undefined;
   private fadeOutRectangle: Phaser.GameObjects.Graphics | undefined;
   private respawnText: Phaser.GameObjects.Text | undefined;
   private idleCount = 0;
@@ -139,12 +140,29 @@ export class GameScene extends Phaser.Scene {
       this.star = state.star;
       this.add.sprite(state.star.x, state.star.y, "star").setScale(0.25).setOrigin(0, 0);
     }
-    if (state.startTime !== undefined) {
-      if (state.finishTime === undefined) {
-        this.timeElapsedText.text = formatTime(Date.now() - state.startTime);
-      } else {
-        this.timeElapsedText.text = formatTime(state.finishTime - state.startTime);
-      }
+    if (state.finishTime !== undefined && this.gameoverText === undefined) {
+      this.gameoverText = this.add
+        .text(
+          VIEWPORT_WIDTH / 2,
+          VIEWPORT_HEIGHT / 2,
+          `You won in ${formatTime(state.finishTime - state.startTime!)}!`,
+          {
+            color: "white",
+            fontSize: "30px",
+          }
+        )
+        .setScrollFactor(0)
+        .setOrigin(0.5)
+        .setInteractive()
+        .on("pointerdown", async () => {
+          this.platforms.forEach((platform) => platform.destroy());
+          await this.connection.startGame({});
+          this.gameoverText!.destroy();
+          this.gameoverText = undefined;
+        });
+      this.timeElapsedText;
+    } else if (state.startTime !== undefined) {
+      this.timeElapsedText.text = formatTime(Date.now() - state.startTime);
     }
     this.eventsBuffer.forEach((event) => {
       if (event === "jump") {
@@ -191,7 +209,7 @@ export class GameScene extends Phaser.Scene {
       .setTileScale(0.25, 0.25)
       .setOrigin(0, 0);
     this.add.existing(sprite);
-    this.platforms.push({ x, y });
+    this.platforms.push(sprite);
   }
 
   private updatePlayer({ id, x, y }: Player) {

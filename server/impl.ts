@@ -72,15 +72,22 @@ export class Impl implements Methods<InternalState> {
     return Response.ok();
   }
   startGame(state: InternalState, userId: string, ctx: Context, request: IStartGameRequest): Response {
-    if (state.startTime !== undefined) {
+    if (state.finishTime === undefined && state.startTime !== undefined) {
       return Response.error("Game already started");
     }
     state.startTime = ctx.time;
+    state.finishTime = undefined;
+    state.platforms.forEach((platform) => platform.destroy());
     const platforms = generatePlatforms(MAP_WIDTH, MAP_HEIGHT, ctx.chance);
     state.platforms = platforms.map(({ x, y, width }) => {
       const platformBody = makeStaticBody(state.physics, x, y, width, PLATFORM_HEIGHT);
       state.players.forEach((player) => state.physics.add.collider(platformBody, player.body));
       return platformBody;
+    });
+    state.players.forEach((player) => {
+      player.body.x = ctx.chance.natural({ max: MAP_WIDTH });
+      player.body.y = MAP_HEIGHT - BORDER_RADIUS;
+      player.body.velocity.y = -0.1;
     });
     return Response.ok();
   }
