@@ -1,7 +1,7 @@
 import { InterpolationBuffer } from "interpolation-buffer";
 import { UserData } from "../../../../api/base";
 import { Inputs, Platform, Player, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
-import { HathoraConnection, StateId } from "../../../.hathora/client";
+import { HathoraConnection } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
 import { formatTime, VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from "../utils";
 
@@ -14,11 +14,10 @@ import musicUrl from "../assets/music.ogg";
 import winUrl from "../assets/win.mp3";
 import deathUrl from "../assets/death.mp3";
 import InputText from "phaser3-rex-plugins/plugins/inputtext";
-import { BufferType } from "./load";
 
 export class GameScene extends Phaser.Scene {
   private user!: UserData;
-  private buffer!: InterpolationBuffer<BufferType>;
+  private stateBuffer!: InterpolationBuffer<PlayerState>;
   private connection!: HathoraConnection;
 
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
@@ -49,15 +48,16 @@ export class GameScene extends Phaser.Scene {
 
   init({
     user,
-    buffer: buffer,
+    stateBuffer,
     connection,
   }: {
     user: UserData;
-    buffer: InterpolationBuffer<BufferType>;
+    stateBuffer: InterpolationBuffer<PlayerState>;
+    eventsBuffer: string[];
     connection: HathoraConnection;
   }) {
     this.user = user;
-    this.buffer = buffer;
+    this.stateBuffer = stateBuffer;
     this.connection = connection;
 
     connection.joinGame({});
@@ -116,7 +116,7 @@ export class GameScene extends Phaser.Scene {
     const inputText = new InputText(this, VIEWPORT_WIDTH - 100, 20, 200, 50, config).setScrollFactor(0);
     this.add.existing(inputText);
 
-    const { state } = this.buffer.getInterpolatedState(Date.now());
+    const { state } = this.stateBuffer.getInterpolatedState(Date.now());
     if (state.startTime === undefined) {
       this.startText = this.add
         .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, `Click to start (${state.players.length} active players)`, {
@@ -133,7 +133,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   update() {
-    const { state, events } = this.buffer.getInterpolatedState(Date.now());
+    const { state, events } = this.stateBuffer.getInterpolatedState(Date.now());
 
     events.forEach((event) => {
       if (event === "jump") {
@@ -173,10 +173,7 @@ export class GameScene extends Phaser.Scene {
             VIEWPORT_WIDTH / 2,
             VIEWPORT_HEIGHT / 2,
             `You won in ${formatTime(state.finishTime! - state.startTime!)}!`,
-            {
-              fontSize: "30px",
-              fontFamily: "futura",
-            }
+            { fontSize: "30px", fontFamily: "futura" }
           )
           .setScrollFactor(0)
           .setOrigin(0.5)
@@ -186,12 +183,10 @@ export class GameScene extends Phaser.Scene {
           .on("pointerdown", async () => {
             await this.connection.startGame({});
           });
-        this.timeElapsedText;
       } else {
         console.error("Unkown event: ", event);
       }
     });
-    events.splice(0, events.length);
 
     state.players.forEach((player) => {
       if (!this.players.has(player.id)) {
