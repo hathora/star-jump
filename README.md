@@ -1,4 +1,6 @@
-# hathora-phaser-demo
+# star-jump
+
+Built using [Hathora](https://github.com/hathora/hathora) and [Phaser](https://phaser.io/).
 
 ### About
 
