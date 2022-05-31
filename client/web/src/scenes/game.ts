@@ -18,7 +18,6 @@ import InputText from "phaser3-rex-plugins/plugins/inputtext";
 export class GameScene extends Phaser.Scene {
   private user!: UserData;
   private stateBuffer!: InterpolationBuffer<PlayerState>;
-  private eventsBuffer!: string[];
   private connection!: HathoraConnection;
 
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
@@ -50,7 +49,6 @@ export class GameScene extends Phaser.Scene {
   init({
     user,
     stateBuffer,
-    eventsBuffer,
     connection,
   }: {
     user: UserData;
@@ -60,7 +58,6 @@ export class GameScene extends Phaser.Scene {
   }) {
     this.user = user;
     this.stateBuffer = stateBuffer;
-    this.eventsBuffer = eventsBuffer;
     this.connection = connection;
 
     connection.joinGame({});
@@ -119,7 +116,7 @@ export class GameScene extends Phaser.Scene {
     const inputText = new InputText(this, VIEWPORT_WIDTH - 100, 20, 200, 50, config).setScrollFactor(0);
     this.add.existing(inputText);
 
-    const state = this.stateBuffer.getInterpolatedState(Date.now());
+    const { state } = this.stateBuffer.getInterpolatedState(Date.now());
     if (state.startTime === undefined) {
       this.startText = this.add
         .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, `Click to start (${state.players.length} active players)`, {
@@ -136,9 +133,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   update() {
-    const state = this.stateBuffer.getInterpolatedState(Date.now());
+    const { state, events } = this.stateBuffer.getInterpolatedState(Date.now());
 
-    this.eventsBuffer.forEach((event) => {
+    events.forEach((event) => {
       if (event === "jump") {
         this.sound.play("jump", { volume: 2 });
       } else if (event === "frozen") {
@@ -190,7 +187,6 @@ export class GameScene extends Phaser.Scene {
         console.error("Unkown event: ", event);
       }
     });
-    this.eventsBuffer.splice(0, this.eventsBuffer.length);
 
     state.players.forEach((player) => {
       if (!this.players.has(player.id)) {

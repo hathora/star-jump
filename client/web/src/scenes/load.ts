@@ -33,17 +33,15 @@ export class LoadScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
     let stateBuffer: InterpolationBuffer<PlayerState>;
-    let eventsBuffer: string[] = [];
     const connection = this.client.connect(
       this.token,
       this.stateId,
       ({ state, updatedAt, events }) => {
         if (stateBuffer === undefined) {
-          stateBuffer = new InterpolationBuffer(state, 25, lerp, (event) => eventsBuffer.push(event));
+          stateBuffer = new InterpolationBuffer(state, 25, lerp);
           this.scene.start("help", {
             user: HathoraClient.getUserFromToken(this.token),
             stateBuffer,
-            eventsBuffer,
             connection,
           });
         } else {
