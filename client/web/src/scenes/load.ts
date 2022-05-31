@@ -1,11 +1,8 @@
 import { InterpolationBuffer } from "interpolation-buffer";
 import { Player, PlayerState } from "../../../../api/types";
-import { MAP_WIDTH, MAP_HEIGHT } from "../../../../shared/constants";
 import { HathoraClient, StateId } from "../../../.hathora/client";
 import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from "../utils";
 import backgroundUrl from "../assets/lobby.png";
-
-export type BufferType = { state: PlayerState; events: string[] };
 
 export class LoadScene extends Phaser.Scene {
   private client!: HathoraClient;
@@ -35,20 +32,22 @@ export class LoadScene extends Phaser.Scene {
         color: "black",
       })
       .setOrigin(0.5);
-    let buffer: InterpolationBuffer<BufferType>;
+    let stateBuffer: InterpolationBuffer<PlayerState>;
+    let eventsBuffer: string[] = [];
     const connection = this.client.connect(
       this.token,
       this.stateId,
       ({ state, updatedAt, events }) => {
-        if (buffer === undefined) {
-          buffer = new InterpolationBuffer({ state, events }, 25, lerp);
+        if (stateBuffer === undefined) {
+          stateBuffer = new InterpolationBuffer(state, 25, lerp, (event) => eventsBuffer.push(event));
           this.scene.start("help", {
             user: HathoraClient.getUserFromToken(this.token),
-            buffer,
+            stateBuffer,
+            eventsBuffer,
             connection,
           });
         } else {
-          buffer.enqueue({ state, events }, updatedAt);
+          stateBuffer.enqueue(state, events, updatedAt);
         }
       },
       console.error
@@ -56,18 +55,17 @@ export class LoadScene extends Phaser.Scene {
   }
 }
 
-function lerp(from: BufferType, to: BufferType, pctElapsed: number): BufferType {
-  const state = {
-    players: to.state.players.map((toPlayer) => {
-      const fromPlayer = from.state.players.find((p) => p.id === toPlayer.id);
+function lerp(from: PlayerState, to: PlayerState, pctElapsed: number): PlayerState {
+  return {
+    players: to.players.map((toPlayer) => {
+      const fromPlayer = from.players.find((p) => p.id === toPlayer.id);
       return fromPlayer !== undefined ? lerpPlayer(fromPlayer, toPlayer, pctElapsed) : toPlayer;
     }),
-    platforms: to.state.platforms,
-    star: to.state.star,
-    startTime: to.state.startTime,
-    finishTime: to.state.finishTime,
+    platforms: to.platforms,
+    star: to.star,
+    startTime: to.startTime,
+    finishTime: to.finishTime,
   };
-  return { state, events: to.events };
 }
 
 function lerpPlayer(from: Player, to: Player, pctElapsed: number): Player {
