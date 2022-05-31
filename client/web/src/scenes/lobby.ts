@@ -11,14 +11,18 @@ export class LobbyScene extends Phaser.Scene {
 
   create() {
     this.add.sprite(0, 0, "background").setOrigin(0, 0).setDisplaySize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-    this.add
+    const createButton = this.add
       .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 4, "Create New Game", {
         fontSize: "20px",
         fontFamily: "futura",
-        color: "black",
       })
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true })
+      .setPadding(10)
+      .setStyle({ backgroundColor: "#111" })
+      .setInteractive({ useHandCursor: true })
+      .on("pointerover", () => createButton.setStyle({ fill: "#f39c12" }))
+      .on("pointerout", () => createButton.setStyle({ fill: "#FFF" }))
       .on("pointerdown", async () => {
         const client = new HathoraClient();
         if (sessionStorage.getItem("token") === null) {
@@ -35,11 +39,20 @@ export class LobbyScene extends Phaser.Scene {
       .text(VIEWPORT_WIDTH / 2, (VIEWPORT_HEIGHT * 3) / 4, "Join Existing Game", {
         fontSize: "20px",
         fontFamily: "futura",
-        color: "black",
       })
       .setInteractive({ useHandCursor: true })
       .setOrigin(0.5)
+      .setPadding(10)
+      .setStyle({ backgroundColor: "#111" })
+      .setInteractive({ useHandCursor: true })
+      .on("pointerover", () => joinButton.setStyle({ fill: "#f39c12" }))
+      .on("pointerout", () => joinButton.setStyle({ fill: "#FFF" }))
       .on("pointerdown", async () => {
+        const stateId = inputText.text?.trim();
+        if (stateId === undefined || stateId === "") {
+          alert("Please enter an existing room code or create a new game!");
+          return;
+        }
         const client = new HathoraClient();
         if (sessionStorage.getItem("token") === null) {
           const newToken = await client.loginAnonymous();
@@ -47,7 +60,7 @@ export class LobbyScene extends Phaser.Scene {
         }
 
         const token = sessionStorage.getItem("token")!;
-        this.scene.start("load", { client, token, stateId: inputText.text?.trim() });
+        this.scene.start("load", { client, token, stateId });
       });
     const config: InputText.IConfig = {
       border: 10,
@@ -57,7 +70,7 @@ export class LobbyScene extends Phaser.Scene {
       color: "black",
       fontFamily: "futura",
     };
-    const inputText = new InputText(this, joinButton.x, joinButton.y - 30, 100, 30, config);
+    const inputText = new InputText(this, joinButton.x, joinButton.y - 40, 100, 30, config);
     this.add.existing(inputText);
   }
 }
