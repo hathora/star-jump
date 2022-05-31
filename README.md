@@ -1,6 +1,6 @@
 # star-jump
 
-Play on [Itch](hpx7.itch.io/star-jump).
+Play on [Itch](https://hpx7.itch.io/star-jump).
 
 Built using [Hathora](https://github.com/hathora/hathora) and [Phaser](https://phaser.io/).
 
