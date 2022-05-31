@@ -14,11 +14,11 @@ import musicUrl from "../assets/music.ogg";
 import winUrl from "../assets/win.mp3";
 import deathUrl from "../assets/death.mp3";
 import InputText from "phaser3-rex-plugins/plugins/inputtext";
+import { BufferType } from "./load";
 
 export class GameScene extends Phaser.Scene {
   private user!: UserData;
-  private stateBuffer!: InterpolationBuffer<PlayerState>;
-  private eventsBuffer!: string[];
+  private buffer!: InterpolationBuffer<BufferType>;
   private connection!: HathoraConnection;
 
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
@@ -49,18 +49,15 @@ export class GameScene extends Phaser.Scene {
 
   init({
     user,
-    stateBuffer,
-    eventsBuffer,
+    buffer: buffer,
     connection,
   }: {
     user: UserData;
-    stateBuffer: InterpolationBuffer<PlayerState>;
-    eventsBuffer: string[];
+    buffer: InterpolationBuffer<BufferType>;
     connection: HathoraConnection;
   }) {
     this.user = user;
-    this.stateBuffer = stateBuffer;
-    this.eventsBuffer = eventsBuffer;
+    this.buffer = buffer;
     this.connection = connection;
 
     connection.joinGame({});
@@ -119,25 +116,26 @@ export class GameScene extends Phaser.Scene {
     const inputText = new InputText(this, VIEWPORT_WIDTH - 100, 20, 200, 50, config).setScrollFactor(0);
     this.add.existing(inputText);
 
-    const state = this.stateBuffer.getInterpolatedState(Date.now());
+    const { state } = this.buffer.getInterpolatedState(Date.now());
     if (state.startTime === undefined) {
       this.startText = this.add
         .text(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, `Click to start (${state.players.length} active players)`, {
-          color: "black",
           fontSize: "30px",
           fontFamily: "futura",
         })
         .setOrigin(0.5)
         .setScrollFactor(0)
         .setInteractive()
+        .on("pointerover", () => this.startText!.setStyle({ fill: "#f39c12" }))
+        .on("pointerout", () => this.startText!.setStyle({ fill: "#FFF" }))
         .on("pointerdown", () => this.connection.startGame({}));
     }
   }
 
   update() {
-    const state = this.stateBuffer.getInterpolatedState(Date.now());
+    const { state, events } = this.buffer.getInterpolatedState(Date.now());
 
-    this.eventsBuffer.forEach((event) => {
+    events.forEach((event) => {
       if (event === "jump") {
         this.sound.play("jump", { volume: 2 });
       } else if (event === "frozen") {
@@ -176,7 +174,6 @@ export class GameScene extends Phaser.Scene {
             VIEWPORT_HEIGHT / 2,
             `You won in ${formatTime(state.finishTime! - state.startTime!)}!`,
             {
-              color: "black",
               fontSize: "30px",
               fontFamily: "futura",
             }
@@ -184,6 +181,8 @@ export class GameScene extends Phaser.Scene {
           .setScrollFactor(0)
           .setOrigin(0.5)
           .setInteractive()
+          .on("pointerover", () => this.gameoverText!.setStyle({ fill: "#F39C12" }))
+          .on("pointerout", () => this.gameoverText!.setStyle({ fill: "#FFF" }))
           .on("pointerdown", async () => {
             await this.connection.startGame({});
           });
@@ -192,7 +191,7 @@ export class GameScene extends Phaser.Scene {
         console.error("Unkown event: ", event);
       }
     });
-    this.eventsBuffer.splice(0, this.eventsBuffer.length);
+    events.splice(0, events.length);
 
     state.players.forEach((player) => {
       if (!this.players.has(player.id)) {
