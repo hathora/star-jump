@@ -32,24 +32,15 @@ export class LoadScene extends Phaser.Scene {
         color: "black",
       })
       .setOrigin(0.5);
-    let stateBuffer: InterpolationBuffer<PlayerState>;
-    const connection = this.client.connect(
-      this.token,
-      this.stateId,
-      ({ state, updatedAt, events }) => {
-        if (stateBuffer === undefined) {
-          stateBuffer = new InterpolationBuffer(state, 25, lerp);
-          this.scene.start("help", {
-            user: HathoraClient.getUserFromToken(this.token),
-            stateBuffer,
-            connection,
-          });
-        } else {
-          stateBuffer.enqueue(state, events, updatedAt);
-        }
-      },
-      console.error
-    );
+    this.client.connect(this.token, this.stateId).then((connection) => {
+      const stateBuffer = new InterpolationBuffer(connection.state, 25, lerp);
+      this.scene.start("help", {
+        user: HathoraClient.getUserFromToken(this.token),
+        stateBuffer,
+        connection,
+      });
+      connection.onUpdate(({ state, events, updatedAt }) => stateBuffer.enqueue(state, events, updatedAt));
+    });
   }
 }
 
