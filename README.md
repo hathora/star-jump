@@ -17,3 +17,5 @@ Built using [Hathora](https://github.com/hathora/hathora) and [Phaser](https://p
 2. Make sure you have hathora installed (`npm install -g hathora`)
 3. Run `hathora dev`
 4. Visit http://localhost:3001
+
+![image](https://user-images.githubusercontent.com/5400947/174648702-71cb2b5b-1d24-4187-b59c-da554b571371.png)
