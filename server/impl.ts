@@ -139,9 +139,9 @@ export class Impl implements Methods<InternalState> {
   onTick(state: InternalState, ctx: Context, timeDelta: number): void {
     state.players.forEach((player) => {
       if (player.inputs.horizontal === XDirection.LEFT && !player.body.blocked.left) {
-        player.body.setVelocityX(-1000);
+        player.body.setVelocityX(-200);
       } else if (player.inputs.horizontal === XDirection.RIGHT && !player.body.blocked.right) {
-        player.body.setVelocityX(1000);
+        player.body.setVelocityX(200);
       } else if (player.inputs.horizontal === XDirection.NONE) {
         player.body.setVelocityX(0);
       }
