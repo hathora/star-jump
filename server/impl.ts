@@ -11,6 +11,7 @@ import {
   YDirection,
   Star,
   IStartGameRequest,
+  HathoraEventTypes,
 } from "../api/types";
 import { Methods, Context } from "./.hathora/methods";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT, PLAYER_HEIGHT, PLAYER_WIDTH } from "../shared/constants";
@@ -75,7 +76,7 @@ export class Impl implements Methods<InternalState> {
     if (state.finishTime === undefined && state.startTime !== undefined) {
       return Response.error("Game already started");
     }
-    ctx.broadcastEvent("start");
+    ctx.broadcastEvent(HathoraEventTypes.start, "");
     state.startTime = ctx.time;
     state.finishTime = undefined;
     state.platforms.forEach((platform) => platform.destroy());
@@ -124,7 +125,7 @@ export class Impl implements Methods<InternalState> {
 
     player.body.moves = false;
     player.freezeTimer = 5;
-    ctx.sendEvent("frozen", userId);
+    ctx.sendEvent(HathoraEventTypes.frozen, "", userId);
     return Response.ok();
   }
   getUserState(state: InternalState, userId: UserId): PlayerState {
@@ -147,7 +148,7 @@ export class Impl implements Methods<InternalState> {
       }
       if (player.inputs.vertical === YDirection.UP && player.body.blocked.down) {
         player.body.setVelocityY(-200);
-        ctx.sendEvent("jump", player.id);
+        ctx.sendEvent(HathoraEventTypes.jump, "", player.id);
       } else if (player.inputs.vertical === YDirection.DOWN && !player.body.blocked.down) {
         player.body.setVelocityY(150);
       }
@@ -159,7 +160,7 @@ export class Impl implements Methods<InternalState> {
           player.body.moves = true;
           player.body.x = ctx.chance.natural({ max: MAP_WIDTH });
           player.body.y = MAP_HEIGHT - BORDER_RADIUS;
-          ctx.sendEvent("respawn", player.id);
+          ctx.sendEvent(HathoraEventTypes.respawn, "", player.id);
         }
       }
 
@@ -167,7 +168,7 @@ export class Impl implements Methods<InternalState> {
         //@ts-ignore
         if (state.physics.overlap(player.body, state.star)) {
           state.finishTime = ctx.time;
-          ctx.broadcastEvent("finish");
+          ctx.broadcastEvent(HathoraEventTypes.finish, "");
         }
       }
     });

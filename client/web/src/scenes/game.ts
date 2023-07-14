@@ -1,7 +1,7 @@
 import { InterpolationBuffer } from "interpolation-buffer";
 import { UserData } from "../../../../api/base";
-import { Inputs, Platform, Player, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
-import { HathoraConnection } from "../../../.hathora/client";
+import { HathoraEvents, Inputs, Platform, Player, PlayerState, Star, UserId, XDirection, YDirection } from "../../../../api/types";
+import { HathoraConnection, RoomId } from "../../../.hathora/client";
 import { MAP_HEIGHT, MAP_WIDTH, PLATFORM_HEIGHT } from "../../../../shared/constants";
 import { formatTime, VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from "../utils";
 
@@ -14,11 +14,13 @@ import musicUrl from "../assets/music.ogg";
 import winUrl from "../assets/win.mp3";
 import deathUrl from "../assets/death.mp3";
 import InputText from "phaser3-rex-plugins/plugins/inputtext";
+import { HathoraEventTypes } from "../../../../api/types";
 
 export class GameScene extends Phaser.Scene {
   private user!: UserData;
   private stateBuffer!: InterpolationBuffer<PlayerState>;
   private connection!: HathoraConnection;
+  private roomId!: RoomId;
 
   private players: Map<UserId, Phaser.GameObjects.Sprite> = new Map();
   private platforms: Phaser.GameObjects.TileSprite[] = [];
@@ -50,15 +52,18 @@ export class GameScene extends Phaser.Scene {
     user,
     stateBuffer,
     connection,
+    roomId,
   }: {
     user: UserData;
     stateBuffer: InterpolationBuffer<PlayerState>;
     eventsBuffer: string[];
     connection: HathoraConnection;
+    roomId: RoomId;
   }) {
     this.user = user;
     this.stateBuffer = stateBuffer;
     this.connection = connection;
+    this.roomId = roomId;
 
     connection.joinGame({});
 
@@ -108,7 +113,7 @@ export class GameScene extends Phaser.Scene {
 
     const config: InputText.IConfig = {
       border: 10,
-      text: `Room Code: ${this.connection.stateId}`,
+      text: `Room Code: ${this.roomId}`,
       color: "black",
       fontFamily: "futura",
       readOnly: true,
@@ -134,11 +139,12 @@ export class GameScene extends Phaser.Scene {
 
   update() {
     const { state, events } = this.stateBuffer.getInterpolatedState(Date.now());
+    const hathoraEvents = events as unknown as HathoraEvents[]
 
-    events.forEach((event) => {
-      if (event === "jump") {
+    hathoraEvents.forEach((event) => {
+      if (event.type === HathoraEventTypes.jump) {
         this.sound.play("jump", { volume: 2 });
-      } else if (event === "frozen") {
+      } else if (event.type === HathoraEventTypes.frozen) {
         this.sound.play("death");
         this.fadeOutRectangle = this.add
           .graphics({ fillStyle: { color: 0x000000 } })
@@ -157,16 +163,16 @@ export class GameScene extends Phaser.Scene {
           alpha: 1,
           duration: 5000,
         });
-      } else if (event === "respawn") {
+      } else if (event.type === HathoraEventTypes.respawn) {
         this.fadeOutRectangle?.destroy();
         this.respawnText?.destroy();
-      } else if (event === "start") {
+      } else if (event.type === HathoraEventTypes.start) {
         this.platforms.forEach((platform) => platform.destroy());
         this.startText?.destroy();
         this.startText = undefined;
         this.gameoverText?.destroy();
         this.gameoverText = undefined;
-      } else if (event === "finish") {
+      } else if (event.type === HathoraEventTypes.finish) {
         this.sound.play("win", { volume: 10 });
         this.gameoverText = this.add
           .text(

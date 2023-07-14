@@ -28,6 +28,13 @@ types:
     startTime: int?
     finishTime: int?
 
+events:
+  start: string
+  finish: string
+  frozen: string
+  jump: string
+  respawn: string
+
 methods:
   joinGame:
   setInputs:

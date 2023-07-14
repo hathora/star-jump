@@ -1,13 +1,13 @@
 import { InterpolationBuffer } from "interpolation-buffer";
 import { Player, PlayerState } from "../../../../api/types";
-import { HathoraClient, StateId } from "../../../.hathora/client";
+import { HathoraClient, RoomId } from "../../../.hathora/client";
 import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from "../utils";
 import backgroundUrl from "../assets/lobby.png";
 
 export class LoadScene extends Phaser.Scene {
   private client!: HathoraClient;
   private token!: string;
-  private stateId!: string;
+  private stateId!: RoomId;
 
   constructor() {
     super("load");
@@ -17,7 +17,7 @@ export class LoadScene extends Phaser.Scene {
     this.load.image("background", backgroundUrl);
   }
 
-  init({ client, token, stateId }: { client: HathoraClient; token: string; stateId: StateId }) {
+  init({ client, token, stateId }: { client: HathoraClient; token: string; stateId: RoomId }) {
     this.client = client;
     this.token = token;
     this.stateId = stateId;
@@ -38,6 +38,7 @@ export class LoadScene extends Phaser.Scene {
         user: HathoraClient.getUserFromToken(this.token),
         stateBuffer,
         connection,
+        roomId: this.stateId,
       });
       connection.onUpdate(({ state, events, updatedAt }) => stateBuffer.enqueue(state, events, updatedAt));
     });
