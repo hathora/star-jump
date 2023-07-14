@@ -8,14 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: npm install hathora -g
-      - run: hathora cloud deploy --appName star-jump --token ${{ secrets.HATHORA_TOKEN }}
+      - run: npm install -g @hathora/cli
+      - run: hathora-cloud deploy --appId app-f335fd9b-e94e-48b8-b7bf-858b8e06f198 --token ${{ secrets.HATHORA_CLOUD_TOKEN }}
   frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - run: npm install hathora surge -g
-      - run: COORDINATOR_HOST=coordinator.hathora.com APP_SECRET=${{ secrets.APP_SECRET }} hathora build --only client
+      - run: HATHORA_APP_ID=app-f335fd9b-e94e-48b8-b7bf-858b8e06f198 hathora build --only client
       - run: cp client/web/dist/index.html client/web/dist/200.html
       - run: surge client/web/dist phaser-hathora.surge.sh
         env:
